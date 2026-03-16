@@ -1,0 +1,202 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Terms of Service — MindEase</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{% static 'accounts/css/legal.css' %}">
+</head>
+<body>
+
+<header class="legal-header">
+    <a href="{% url 'home' %}" class="back-link"><i class="fa-solid fa-arrow-left"></i> Back to Home</a>
+    <h1>Terms of Service</h1>
+    <p class="effective-date">Effective Date: March 2025</p>
+</header>
+
+<main class="legal-container">
+
+    <nav class="toc">
+        <h2>Table of Contents</h2>
+        <ol>
+            <li><a href="#acceptance">Acceptance of Terms</a></li>
+            <li><a href="#eligibility">Eligibility</a></li>
+            <li><a href="#account">Account Responsibilities</a></li>
+            <li><a href="#platform-scope">Platform Scope & Limitations</a></li>
+            <li><a href="#ai-companion">AI Companion Disclaimer</a></li>
+            <li><a href="#counselor-obligations">Counselor Obligations</a></li>
+            <li><a href="#booking">Booking & Cancellation</a></li>
+            <li><a href="#video-sessions">Video Sessions</a></li>
+            <li><a href="#feedback">Feedback & Reviews</a></li>
+            <li><a href="#prohibited">Prohibited Conduct</a></li>
+            <li><a href="#ip">Intellectual Property</a></li>
+            <li><a href="#liability">Limitation of Liability</a></li>
+            <li><a href="#termination">Termination</a></li>
+            <li><a href="#amendments">Amendments</a></li>
+            <li><a href="#governing-law">Governing Law</a></li>
+            <li><a href="#contact">Contact</a></li>
+        </ol>
+    </nav>
+
+    <section class="legal-section" id="acceptance">
+        <h2>1. Acceptance of Terms</h2>
+        <p>By creating an account on MindEase, you agree to be bound by these Terms of Service. If you do not agree to these terms, you must not use the platform. Your continued use of MindEase constitutes ongoing acceptance of any updated terms.</p>
+    </section>
+
+    <section class="legal-section" id="eligibility">
+        <h2>2. Eligibility</h2>
+        <p>To use MindEase, you must:</p>
+        <ul>
+            <li>Be at least 13 years of age</li>
+            <li>Provide accurate and truthful information during registration</li>
+            <li>Have a valid email address for account verification</li>
+        </ul>
+        <p>Counselor accounts are additionally subject to an admin-led credential verification process. You may not use the platform in a professional capacity until your account has been verified by MindEase administration.</p>
+    </section>
+
+    <section class="legal-section" id="account">
+        <h2>3. Account Responsibilities</h2>
+        <p>You are responsible for:</p>
+        <ul>
+            <li>Maintaining the confidentiality of your login credentials</li>
+            <li>All activity that occurs under your account</li>
+            <li>Notifying us immediately of any unauthorized use of your account</li>
+            <li>Providing accurate emergency contact information (required for user accounts)</li>
+        </ul>
+        <p>MindEase reserves the right to deactivate accounts that provide false or misleading information.</p>
+    </section>
+
+    <section class="legal-section" id="platform-scope">
+        <h2>4. Platform Scope & Limitations</h2>
+        <p>MindEase is designed to provide:</p>
+        <ul>
+            <li>AI-assisted mental health support for generalized stress, anxiety, and mild depression</li>
+            <li>Secure video consultations with verified counselors</li>
+            <li>Wellness tips and mental health resources</li>
+        </ul>
+        <p><strong>MindEase is NOT a substitute for emergency services, psychiatric treatment, or clinical diagnosis.</strong> If you are experiencing a mental health crisis, suicidal thoughts, or any immediate danger, please contact your local emergency services or the appropriate crisis hotline immediately.</p>
+        <p>The platform currently operates as a web-based application and supports English-language interactions only.</p>
+    </section>
+
+    <section class="legal-section" id="ai-companion">
+        <h2>5. AI Companion Disclaimer</h2>
+        <p>The MindEase AI Companion is powered by Groq's LLaMA 3.3 70B Versatile model. It is designed to provide conversational support, platform navigation assistance, and counselor recommendations. However:</p>
+        <ul>
+            <li>The AI is <strong>not a licensed mental health professional</strong> and does not provide clinical diagnoses or treatment</li>
+            <li>AI responses are generated by a language model and may occasionally produce inaccurate or inappropriate content</li>
+            <li>The AI may recommend that you speak with a verified counselor based on its assessment of your conversation — this recommendation is algorithmic and not a clinical referral</li>
+            <li>Conversations with the AI are stored in the database and can be cleared by you at any time</li>
+        </ul>
+    </section>
+
+    <section class="legal-section" id="counselor-obligations">
+        <h2>6. Counselor Obligations</h2>
+        <p>Counselors registered on MindEase agree to:</p>
+        <ul>
+            <li>Provide accurate professional credentials, license numbers, and institution details during registration</li>
+            <li>Maintain valid professional certification at all times</li>
+            <li>Conduct sessions in accordance with the <a href="{% url 'code_of_ethics' %}">Professional Code of Ethics</a></li>
+            <li>Write clinical notes after each completed session for continuity of care</li>
+            <li>Not engage in any activity that exploits the counselor-client relationship</li>
+            <li>Refer users to appropriate emergency services or higher-level care when necessary</li>
+        </ul>
+        <p>MindEase administrations reserves the right to revoke or suspend counselor verification at any time if violations are identified.</p>
+    </section>
+
+    <section class="legal-section" id="booking">
+        <h2>7. Booking & Cancellation</h2>
+        <ul>
+            <li>Users may book sessions with verified counselors based on available time slots</li>
+            <li>Bookings are subject to slot availability and are processed on a first-come, first-served basis</li>
+            <li>Both client-side and server-side booking deadline enforcement apply — you cannot book a slot whose time window has already passed</li>
+            <li>Users may cancel appointments at any time before the session begins</li>
+            <li>Counselors may set vacation mode to block bookings during specified date ranges</li>
+        </ul>
+    </section>
+
+    <section class="legal-section" id="video-sessions">
+        <h2>8. Video Sessions</h2>
+        <p>Video consultations on MindEase are powered by Agora RTC. By joining a video session, you agree that:</p>
+        <ul>
+            <li>Audio and video streams are transmitted in real-time through Agora's servers for the duration of the session only</li>
+            <li>Sessions may include in-session text messaging and emoji reactions via WebSocket</li>
+            <li>MindEase does not record video or audio from sessions</li>
+            <li>Session duration is tracked automatically and recorded upon completion</li>
+            <li>Counselors may access your past clinical notes during the session to provide continuity of care</li>
+        </ul>
+    </section>
+
+    <section class="legal-section" id="feedback">
+        <h2>9. Feedback & Reviews</h2>
+        <ul>
+            <li>After a completed session, users may submit a feedback message with an optional 1–5 star rating</li>
+            <li>Feedback is one-time per appointment and cannot be edited after submission</li>
+            <li>Reviews are displayed in anonymized form on counselor profiles (e.g., "User #1", "User #2")</li>
+            <li>Counselors can view their aggregated rating and featured review on their dashboard</li>
+        </ul>
+    </section>
+
+    <section class="legal-section" id="prohibited">
+        <h2>10. Prohibited Conduct</h2>
+        <p>You agree not to:</p>
+        <ul>
+            <li>Impersonate another person or provide false registration information</li>
+            <li>Use the platform for any illegal or unauthorized purpose</li>
+            <li>Attempt to gain unauthorized access to other users' accounts or data</li>
+            <li>Harass, abuse, or threaten any user, counselor, or administrator</li>
+            <li>Share, distribute, or sell content from the AI Companion or counselor sessions without consent</li>
+            <li>Circumvent or manipulate the booking system, slot availability, or feedback ratings</li>
+        </ul>
+    </section>
+
+    <section class="legal-section" id="ip">
+        <h2>11. Intellectual Property</h2>
+        <p>All content, design, code, and branding of MindEase — including but not limited to the logo, interface design, AI system prompts, and platform features — are the intellectual property of the MindEase development team. You may not reproduce, distribute, or create derivative works without explicit written permission.</p>
+    </section>
+
+    <section class="legal-section" id="liability">
+        <h2>12. Limitation of Liability</h2>
+        <p>MindEase is provided on an "as-is" basis. To the maximum extent permitted by law:</p>
+        <ul>
+            <li>We do not guarantee that the platform will be uninterrupted, error-free, or available at all times</li>
+            <li>We are not liable for any damages arising from your use of the AI Companion's responses</li>
+            <li>We are not liable for the conduct, advice, or actions of counselors during or outside of sessions</li>
+            <li>We are not liable for any data loss resulting from third-party service outages (Groq, Agora, Gmail)</li>
+        </ul>
+    </section>
+
+    <section class="legal-section" id="termination">
+        <h2>13. Termination</h2>
+        <p>MindEase reserves the right to suspend or terminate your account at any time for violations of these Terms of Service, including but not limited to: providing false credentials, engaging in prohibited conduct, or any activity that jeopardizes platform security or user safety.</p>
+        <p>You may request account deletion at any time through the "Get Support" page.</p>
+    </section>
+
+    <section class="legal-section" id="amendments">
+        <h2>14. Amendments</h2>
+        <p>We reserve the right to modify these Terms of Service at any time. Changes will be effective upon updating this page. Continued use of MindEase after modifications constitutes acceptance of the revised terms.</p>
+    </section>
+
+    <section class="legal-section" id="governing-law">
+        <h2>15. Governing Law</h2>
+        <p>These Terms of Service shall be governed by and construed in accordance with the laws of the Republic of the Philippines.</p>
+    </section>
+
+    <section class="legal-section" id="contact">
+        <h2>16. Contact</h2>
+        <p>For questions about these Terms of Service, please use the "Get Support" page on your dashboard or contact the MindEase administration team.</p>
+    </section>
+
+</main>
+
+<footer class="legal-footer">
+    <p>&copy; 2024 MindEase — Integrated Mental Health Support Platform</p>
+</footer>
+
+<button class="back-to-top" title="Back to top"><i class="fa-solid fa-arrow-up"></i></button>
+
+<script src="{% static 'accounts/js/legal.js' %}"></script>
+</body>
+</html>

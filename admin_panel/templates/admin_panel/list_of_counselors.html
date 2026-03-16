@@ -1,0 +1,139 @@
+{% extends "admin_panel/base.html" %}
+{% load static %}
+
+{% block title %}Counselor List | MindEase Administration{% endblock %}
+
+{% block extrastyle %}
+{{ block.super }}
+<link rel="stylesheet" href="{% static 'admin_panel/css/list_of_users.css' %}">
+<link rel="stylesheet" href="{% static 'admin_panel/css/custom_search.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="admin-dashboard-wrapper {% if sidebar_collapsed %}sidebar-collapsed{% endif %}">
+    {% include "admin_panel/success_message.html" %}
+    <div class="page-header">
+        <h1 class="page-title">Counselor List</h1>
+    </div>
+
+    <div class="custom-user-list-container">
+        <!-- Search and Filter Controls -->
+        <div class="filter-controls">
+            <div class="search-container">
+                <div class="input-group">
+                    <div class="custom-search-dropdown" id="searchFieldDropdown">
+                        <div class="search-dropdown-toggle">
+                            <span id="searchFieldText">Select field to search...</span>
+                            <span class="search-dropdown-icon">▼</span>
+                        </div>
+                        <div class="search-dropdown-options">
+                            <div class="search-dropdown-option" data-value="">Select field to search...</div>
+                            <div class="search-dropdown-option" data-value="id">ID</div>
+                            <div class="search-dropdown-option" data-value="full_name">Full Name</div>
+                            <div class="search-dropdown-option" data-value="email">Email</div>
+                            <div class="search-dropdown-option" data-value="age">Age</div>
+                            <div class="search-dropdown-option" data-value="gender">Gender</div>
+                            <div class="search-dropdown-option" data-value="emergency_contact">Emergency Contact</div>
+                            <div class="search-dropdown-option" data-value="specializations">Specializations</div>
+                            <div class="search-dropdown-option" data-value="other_specializations">Other Specializations
+                            </div>
+                            <div class="search-dropdown-option" data-value="institution">Institution</div>
+                            <div class="search-dropdown-option" data-value="license">License</div>
+                            <div class="search-dropdown-option" data-value="experience">Experience</div>
+                            <div class="search-dropdown-option" data-value="privacy_policy">Privacy Policy</div>
+                            <div class="search-dropdown-option" data-value="status">Status</div>
+                            <div class="search-dropdown-option" data-value="verified">Verified</div>
+                            <div class="search-dropdown-option" data-value="staff">Staff</div>
+                            <div class="search-dropdown-option" data-value="superuser">Superuser</div>
+                        </div>
+                        <input type="hidden" id="searchField" name="searchField" value="">
+                    </div>
+                </div>
+
+                <input type="text" id="searchInput" class="search-input filter-input" placeholder="Enter search term..."
+                    disabled aria-label="Search counselors">
+
+                <button id="clearSearch" class="clear-search-btn filter-input" disabled aria-label="Clear search"
+                    onclick="clearSearchDropdown()">Clear</button>
+            </div>
+
+            <div class="filter-summary">
+                <span id="filterSummary">Showing all counselors</span>
+            </div>
+        </div>
+
+        <table class="custom-user-table" aria-label="Counselor List" id="counselorTable">
+            <thead>
+                <tr>
+                    <th data-field="id">ID</th>
+                    <th data-field="full_name">Full Name</th>
+                    <th data-field="email">Email</th>
+                    <th data-field="age">Age</th>
+                    <th data-field="gender">Gender</th>
+                    <th data-field="emergency_contact">Emergency Contact</th>
+                    <th data-field="specializations">Specializations</th>
+                    <th data-field="other_specializations">Other Specializations</th>
+                    <th data-field="institution">Institution</th>
+                    <th data-field="license">License</th>
+                    <th data-field="experience">Experience</th>
+                    <th data-field="privacy_policy">Privacy Policy</th>
+                    <th data-field="status">Status</th>
+                    <th data-field="verified">Verified</th>
+                    <th data-field="staff">Staff</th>
+                    <th data-field="superuser">Superuser</th>
+                    <th data-field="created_at">Created At</th>
+                </tr>
+            </thead>
+            <tbody id="counselorTableBody">
+                {% for counselor in counselors %}
+                <tr data-counselor-id="{{ counselor.id }}">
+                    <td data-field="id">{{ counselor.id }}</td>
+                    <td data-field="full_name">{{ counselor.full_name }}</td>
+                    <td data-field="email">{{ counselor.email }}</td>
+                    <td data-field="age">{{ counselor.age|default:"N/A" }}</td>
+                    <td data-field="gender">{{ counselor.get_gender_display_admin|default:"N/A" }}</td>
+                    <td data-field="emergency_contact">{{ counselor.get_emergency_contact_display|default:"N/A" }}</td>
+                    <td data-field="specializations">{{ counselor.get_specializations_display }}</td>
+                    <td data-field="other_specializations">{{ counselor.other_specializations|default:"N/A" }}</td>
+                    <td data-field="institution">{{ counselor.get_institution_display|default:"N/A" }}</td>
+                    <td data-field="license">{{ counselor.get_license_display|default:"N/A" }}</td>
+                    <td data-field="experience">{{ counselor.get_experience_display|default:"N/A" }}</td>
+                    <td data-field="privacy_policy">{{ counselor.accepted_privacy_policy|yesno:"Yes,No" }}</td>
+                    <td data-field="status">{{ counselor.is_active|yesno:"Active,Inactive" }}</td>
+                    <td data-field="verified">
+                        {% if not counselor.is_verified and not counselor.is_active %}
+                        Rejected
+                        {% elif counselor.is_verified %}
+                        Verified
+                        {% else %}
+                        Pending Review
+                        {% endif %}
+                    </td>
+                    <td data-field="staff">{{ counselor.is_staff|yesno:"Yes,No" }}</td>
+                    <td data-field="superuser">{{ counselor.is_superuser|yesno:"Yes,No" }}</td>
+                    <td data-field="created_at">{{ counselor.created_at|date:"F j, Y, g:i A" }}</td>
+                </tr>
+                {% empty %}
+                <tr id="noCounselorsRow">
+                    <td colspan="17">No counselors found.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <div id="noResultsMessage" class="no-results" style="display: none;">
+            <div class="no-results-content">
+                <div class="no-results-icon"><i class="fas fa-search"></i></div>
+                <h3>No results found</h3>
+                <p>No counselors match your search criteria. Try adjusting your search terms.</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block footer %}
+{{ block.super }}
+<script src="{% static 'admin_panel/js/custom_search.js' %}"></script>
+<script src="{% static 'admin_panel/js/list_of_users.js' %}"></script>
+{% endblock %}

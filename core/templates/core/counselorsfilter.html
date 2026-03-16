@@ -1,0 +1,145 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Find Your Perfect Counselor | MindEase</title>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="{% static 'core/css/counselorsfilter.css' %}">
+</head>
+
+<body>
+
+  <header class="navbar-glass">
+    <a href="{% url 'user_dashboard' %}" class="brand-logo">
+      <img src="{% static 'accounts/images/logo.png' %}" alt="Logo">
+      <span>MindEase</span>
+    </a>
+  </header>
+
+  <main class="page-container">
+
+    <a href="{% url 'user_dashboard' %}" class="back-link">
+      <i class="fa-solid fa-arrow-left"></i> Back to Dashboard
+    </a>
+
+    <section class="section-header">
+      <h1>Find Your Perfect Counselor</h1>
+      <p>Browse our network of verified mental health professionals</p>
+    </section>
+
+    <!-- FILTERS -->
+    <section class="filter-card">
+      <h3><i class="fa-solid fa-sliders" style="color:var(--accent);margin-right:6px;"></i>Filter Counselors</h3>
+      <div class="filter-grid">
+        <div class="filter-field">
+          <label>Search</label>
+          <div style="position:relative; display:flex; align-items:center;">
+            <i class="fa-solid fa-magnifying-glass" style="position:absolute; left:12px; color:var(--text-muted); font-size:12px;"></i>
+            <input type="text" id="search" placeholder="Search by name..."
+              style="padding-left:36px;">
+          </div>
+        </div>
+        <div class="filter-field">
+          <label>Specialization</label>
+          <div class="custom-dropdown" id="specDropdown">
+            <div class="dropdown-toggle" id="specToggle" onclick="toggleDropdown()">
+              <span id="dropdownText">All Specializations</span>
+              <i class="fa-solid fa-chevron-down dropdown-icon"></i>
+            </div>
+            <div class="dropdown-menu" id="specMenu">
+              <div class="dropdown-item active" data-value="all">All Specializations</div>
+              <div class="dropdown-item" data-value="Anxiety & Stress">Anxiety & Stress</div>
+              <div class="dropdown-item" data-value="Depression & Mood">Depression & Mood</div>
+              <div class="dropdown-item" data-value="Relationship Issues">Relationship Issues</div>
+              <div class="dropdown-item" data-value="Trauma & PTSD">Trauma & PTSD</div>
+              <div class="dropdown-item" data-value="Grief & Loss">Grief & Loss</div>
+              <div class="dropdown-item" data-value="Self-Esteem">Self-Esteem</div>
+              <div class="dropdown-item" data-value="Life Transitions">Life Transitions</div>
+              <div class="dropdown-item" data-value="Work Stress">Work Stress</div>
+              <div class="dropdown-item" data-value="Financial Stress">Financial Stress</div>
+              <div class="dropdown-item" data-value="Academic Pressure">Academic Pressure</div>
+              <div class="dropdown-item" data-value="Parenting">Parenting</div>
+              <div class="dropdown-item" data-value="Anger Management">Anger Management</div>
+              <div class="dropdown-item" data-value="Mindfulness">Mindfulness</div>
+              <div class="dropdown-item" data-value="Other Mild Concerns">Other Mild Concerns</div>
+            </div>
+          </div>
+          <!-- Hidden input to store the actual value for the JS logic -->
+          <input type="hidden" id="specialization" value="all">
+        </div>
+      </div>
+    </section>
+
+    <!-- COUNSELOR LIST (lazy loaded) -->
+    <section class="counselor-list" id="counselorList"></section>
+
+    <!-- LOADING SPINNER -->
+    <div class="lazy-loader" id="lazyLoader" style="display:none;">
+      <div class="spinner"></div>
+      <p>Loading more counselors...</p>
+    </div>
+
+    <!-- NO RESULTS -->
+    <p class="empty-state" id="emptyState" style="display:none;">No counselors found.</p>
+
+  </main>
+
+  <!-- REVIEWS LIST MODAL -->
+  <div class="modal-overlay" id="reviewsModalOverlay" style="display:none;">
+    <div class="modal-box reviews-modal">
+      <div class="modal-header">
+        <h3 id="reviewsModalTitle">Reviews</h3>
+        <button class="modal-close" id="reviewsModalClose">&times;</button>
+      </div>
+      <div class="modal-body" id="reviewsModalBody">
+        <!-- populated by JS -->
+      </div>
+    </div>
+  </div>
+
+  <!-- FEATURED REVIEW MODAL -->
+  <div class="modal-overlay" id="featuredModalOverlay" style="display:none;">
+    <div class="modal-box featured-modal">
+      <div class="modal-header">
+        <h3>Featured Review</h3>
+        <button class="modal-close" id="featuredModalClose">&times;</button>
+      </div>
+      <div class="modal-body" id="featuredModalBody">
+        <!-- populated by JS -->
+      </div>
+    </div>
+  </div>
+
+  <!-- OTHER MILD CONCERNS MODAL -->
+  <div class="modal-overlay" id="otherConcernsModalOverlay" style="display:none;">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3>Other Mild Concerns</h3>
+        <button class="modal-close" id="otherConcernsModalClose">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p id="otherConcernsModalBody" style="color:var(--text-primary); line-height:1.6; word-wrap:break-word; overflow-wrap:break-word;"></p>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script>
+    window.AI_USER_NAME = "{{ user.full_name|default:user.get_username|escapejs }}";
+  </script>
+  <script src="{% static 'core/js/counselorsfilter.js' %}?v=5"></script>
+
+  {% if user.is_authenticated %}
+  {% include 'ai_companion/widget.html' %}
+  {% endif %}
+
+</body>
+</html>

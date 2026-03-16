@@ -1,0 +1,247 @@
+{% extends "admin/base.html" %}
+{% load static i18n %}
+
+{% block title %}Pending Counselor Approvals | {{ site_title|default:_('Django site admin') }}{% endblock %}
+
+{% block extrastyle %}
+{{ block.super }}
+<link rel="stylesheet" href="{% static 'admin_panel/css/admin.css' %}">
+<link rel="stylesheet" href="{% static 'admin_panel/css/pending_approval.css' %}">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+    integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA=="
+    crossorigin="anonymous" referrerpolicy="no-referrer" />
+{% endblock %}
+
+{% block breadcrumbs %}
+{% endblock %}
+
+{% block header %}
+<div class="custom-admin-navbar">
+    <div class="navbar-brand">
+        <a href="{% url 'admin:index' %}">
+            <span class="admin-logo">MindEase Administration</span>
+        </a>
+    </div>
+
+    <div class="navbar-user">
+        {% if user.is_authenticated %}
+        <span class="welcome-msg">Welcome, <strong>{{ user.full_name.split.0|title }}!</strong></span>
+        <form method="post" action="{% url 'custom_admin:logout' %}" style="display:inline;">
+            {% csrf_token %}
+            <button type="submit" class="logout-btn">Log out</button>
+        </form>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block messages %}{% endblock %}
+
+{% block nav-sidebar %}
+{% include 'admin_panel/admin_custom_sidebar.html' %}
+{% endblock %}
+
+{% block content %}
+<div class="admin-dashboard-wrapper">
+    <div class="admin-dashboard-content" id="dashboard-content">
+        <h1>Pending Counselor Approvals</h1>
+
+        {% if pending_counselors %}
+        <div class="pending-list">
+            {% for counselor in pending_counselors %}
+            <div class="counselor-item" id="counselor-{{ counselor.id }}">
+                <div class="counselor-main-info">
+                    <span class="counselor-number">{{ forloop.counter }}.</span>
+                    <span class="counselor-name">{{ counselor.full_name }}</span>
+                    <div class="counselor-actions">
+                        <button class="view-info-btn" data-counselor-id="{{ counselor.id }}"
+                            data-counselor-name="{{ counselor.full_name }}" data-counselor-email="{{ counselor.email }}"
+                            data-counselor-specializations="{{ counselor.get_specializations_display }}"
+                            data-counselor-other-specializations="{{ counselor.other_specializations|default:'N/A' }}"
+                            data-counselor-institution="{{ counselor.institution_name|default:'N/A' }}"
+                            data-counselor-institution-email="{{ counselor.institution_email|default:'N/A' }}"
+                            data-counselor-license="{{ counselor.license_number|default:'N/A' }}"
+                            data-counselor-experience="{{ counselor.years_experience|default:'N/A' }}"
+                            data-counselor-bio="{{ counselor.bio|default:'N/A' }}"
+                            data-counselor-professional-id="{% if counselor.professional_id %}{{ counselor.professional_id.url }}{% else %}N/A{% endif %}"
+                            data-counselor-degree="{{ counselor.degree_certificate.url|default:'N/A' }}"
+                            data-counselor-created="{{ counselor.created_at|date:'M d, Y' }}">
+                            View Info
+                        </button>
+                        <button class="approve-btn" data-counselor-id="{{ counselor.id }}"
+                            data-counselor-name="{{ counselor.full_name }}">
+                            Approve
+                        </button>
+                        <button class="reject-btn" data-counselor-id="{{ counselor.id }}"
+                            data-counselor-name="{{ counselor.full_name }}">
+                            Reject
+                        </button>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="no-pending">
+            <p>No pending counselor approvals at this time.</p>
+        </div>
+        {% endif %}
+
+        <!-- Info Modal -->
+        <div id="counselorModal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 id="modalCounselorName">Counselor Information</h2>
+                    <span class="close">&times;</span>
+                </div>
+                <div class="modal-body">
+                    <div class="info-grid">
+                        <div class="info-card">
+                            <div class="info-icon"><i class="fas fa-envelope"></i></div>
+                            <div class="info-content">
+                                <label>Email</label>
+                                <span id="modalEmail">-</span>
+                            </div>
+                        </div>
+                        <div class="info-card">
+                            <div class="info-icon"><i class="fas fa-hospital"></i></div>
+                            <div class="info-content">
+                                <label>Institution</label>
+                                <span id="modalInstitution">-</span>
+                            </div>
+                        </div>
+                        <div class="info-card">
+                            <div class="info-icon"><i class="fas fa-envelope"></i></div>
+                            <div class="info-content">
+                                <label>Institution Email</label>
+                                <span id="modalInstitutionEmail">-</span>
+                            </div>
+                        </div>
+                        <div class="info-card">
+                            <div class="info-icon"><i class="fas fa-id-card"></i></div>
+                            <div class="info-content">
+                                <label>License Number</label>
+                                <span id="modalLicense">-</span>
+                            </div>
+                        </div>
+                        <div class="info-card">
+                            <div class="info-icon"><i class="fas fa-briefcase"></i></div>
+                            <div class="info-content">
+                                <label>Experience</label>
+                                <span id="modalExperience">-</span>
+                            </div>
+                        </div>
+                        <div class="info-card">
+                            <div class="info-icon"><i class="fas fa-calendar-alt"></i></div>
+                            <div class="info-content">
+                                <label>Applied On</label>
+                                <span id="modalCreated">-</span>
+                            </div>
+                        </div>
+                        <div class="info-card specializations-card">
+                            <div class="info-icon"><i class="fas fa-bullseye"></i></div>
+                            <div class="info-content">
+                                <label>Specializations</label>
+                                <span id="modalSpecializations">-</span>
+                            </div>
+                        </div>
+                        <div class="info-card other-specializations-card">
+                            <div class="info-icon"><i class="fas fa-plus-circle"></i></div>
+                            <div class="info-content">
+                                <label>Other Specializations</label>
+                                <span id="modalOtherSpecializations">-</span>
+                            </div>
+                        </div>
+                        <div class="info-card bio-card">
+                            <div class="info-icon"><i class="fas fa-file-alt"></i></div>
+                            <div class="info-content">
+                                <label>Professional Bio</label>
+                                <span id="modalBio">-</span>
+                            </div>
+                        </div>
+                        <div class="info-card">
+                            <div class="info-icon"><i class="fas fa-id-badge"></i></div>
+                            <div class="info-content">
+                                <label>Professional ID</label>
+                                <span id="modalProfessionalId">-</span>
+                            </div>
+                        </div>
+                        <div class="info-card">
+                            <div class="info-icon"><i class="fas fa-graduation-cap"></i></div>
+                            <div class="info-content">
+                                <label>Degree Certificate</label>
+                                <span id="modalDegree">-</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Approve Confirmation Modal -->
+        <div id="approveModal" class="confirmation-modal">
+            <div class="confirmation-content">
+                <div class="confirmation-header approve-header">
+                    <div class="confirmation-icon"><i class="fas fa-check-circle"></i></div>
+                    <h3>Approve Counselor</h3>
+                    <span class="confirmation-close">&times;</span>
+                </div>
+                <div class="confirmation-body">
+                    <p>Are you sure you want to approve <strong id="approveCounselorName"></strong> as a counselor?</p>
+                    <p class="confirmation-subtitle">This action will grant them access to the counselor dashboard.</p>
+                </div>
+                <div class="confirmation-actions">
+                    <button class="confirm-btn approve-confirm">Yes, Approve</button>
+                    <button class="cancel-btn">Cancel</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Reject Confirmation Modal -->
+        <div id="rejectModal" class="confirmation-modal">
+            <div class="confirmation-content">
+                <div class="confirmation-header reject-header">
+                    <div class="confirmation-icon"><i class="fas fa-times-circle"></i></div>
+                    <h3>Reject Counselor</h3>
+                    <span class="confirmation-close">&times;</span>
+                </div>
+                <div class="confirmation-body">
+                    <p>Are you sure you want to reject <strong id="rejectCounselorName"></strong>'s application?</p>
+                    <p class="confirmation-subtitle">This action cannot be undone and they will be notified.</p>
+                </div>
+                <div class="confirmation-actions">
+                    <button class="confirm-btn reject-confirm">Yes, Reject</button>
+                    <button class="cancel-btn">Cancel</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Loading Overlay -->
+        <div id="loadingOverlay" class="loading-overlay">
+            <div class="loading-content">
+                <div class="loading-spinner">
+                    <div class="spinner-ring"></div>
+                    <div class="spinner-ring"></div>
+                    <div class="spinner-ring"></div>
+                </div>
+                <div class="loading-text">
+                    <h3 id="loadingTitle">Processing...</h3>
+                    <p id="loadingMessage">Please wait while we process your request.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block footer %}
+<div id="footer" class="admin-footer">
+    <p>2024 MindEase - Integrated Mental Health Support Platform. Empowering minds, transforming lives.</p>
+</div>
+
+<script>
+    window.csrfToken = '{{ csrf_token }}';
+</script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="{% static 'admin_panel/js/pending_approval.js' %}"></script>
+{% endblock %}

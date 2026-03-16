@@ -1,0 +1,353 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MindEase - Counselor Dashboard</title>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="{% static 'core/css/counselordashboard.css' %}">
+</head>
+
+<body>
+  <div class="dashboard">
+
+    <!-- HEADER -->
+    <header class="header">
+      <a href="{% url 'counselor_dashboard' %}" class="logo">
+        <img src="{% static 'accounts/images/logo.png' %}" alt="Logo">
+        <span>MindEase</span>
+      </a>
+      <div class="user-menu">
+        <span class="username">
+          Hi, {{ user.full_name|default:user.get_username|title }}!
+        </span>
+        <a href="{% url 'logout' %}" class="logout-btn">Logout</a>
+      </div>
+    </header>
+
+    <main class="main-content">
+
+      <!-- WELCOME SECTION -->
+      <section class="welcome-section">
+        <h1>Welcome back, {{ user.full_name|default:user.get_username|title }}!</h1>
+        <p>Here's what's happening today <i class="fa-solid fa-hand-point-down"></i></p>
+      </section>
+
+      <div class="dashboard-grid">
+
+        <!-- LEFT COLUMN -->
+        <div class="left-column">
+
+          <!-- TODAY'S SCHEDULE -->
+          <div class="card">
+            <div class="card-header">
+              <h2>Today's Schedule</h2>
+              <a href="{% url 'manage_availability' %}" class="view-calendar-btn">
+                <i class="fa-solid fa-calendar"></i> View Calendar
+              </a>
+            </div>
+
+            <div id="today-appointments-list">
+            {% if today_appointments %}
+              {% for appt in today_appointments %}
+              <div class="session" id="counselor-session-today-{{ appt.id }}">
+                <div class="avatar">{{ appt.patient.full_name|first }}</div>
+                <div class="details">
+                  <p class="name">{{ appt.patient.full_name }}</p>
+                  <p class="info">{{ appt.time|time:"P" }} – {{ appt.patient.get_reason_display|default:"Counseling" }}</p>
+                </div>
+                <span class="status upcoming">{{ appt.status }}</span>
+                {% if appt.status == "Pending" %}
+                  <button class="join-btn" onclick="startSession('{{ appt.id }}')">Start Session</button>
+                {% elif appt.status == "started" %}
+                  <a href="{% url 'join_session' appt.id %}" class="rejoin-btn">Rejoin Session</a>
+                  <button class="logout-btn" onclick="endSession('{{ appt.id }}')">End Session</button>
+                {% elif appt.status == "completed" %}
+                  <span class="tag-completed">Completed</span>
+                {% endif %}
+              </div>
+              {% endfor %}
+            {% else %}
+              <p id="no-today-msg">No appointments today.</p>
+            {% endif %}
+            </div>
+          </div>
+
+          <!-- UPCOMING APPOINTMENTS -->
+          <div class="card">
+            <h2>Upcoming Appointments</h2>
+            <div id="upcoming-appointments-list">
+            {% if upcoming_appointments %}
+              {% for appt in upcoming_appointments %}
+              <div class="session" id="counselor-session-upcoming-{{ appt.id }}">
+                <div class="avatar">{{ appt.patient.full_name|first }}</div>
+                <div class="details">
+                  <p class="name">{{ appt.patient.full_name }}</p>
+                  <p class="info">{{ appt.date|date:"M d" }} – {{ appt.time|time:"P" }}</p>
+                </div>
+                <span class="tag">{{ appt.patient.get_reason_display|default:"Counseling" }}</span>
+              </div>
+              {% endfor %}
+            {% else %}
+              <p id="no-upcoming-msg">No upcoming appointments.</p>
+            {% endif %}
+            </div>
+          </div>
+
+          <!-- THIS WEEK'S SCHEDULE -->
+          <div class="card">
+            <div class="card-header">
+              <h2>This Week's Schedule</h2>
+              <button class="view-calendar-btn" onclick="clearWeekSchedule()">
+                <i class="fa-solid fa-broom"></i> Clear
+              </button>
+            </div>
+            <div class="week-schedule-scroll" id="this-week-schedule-list">
+              {% if this_week_schedule %}
+                {% for appt in this_week_schedule %}
+                <div class="session" id="counselor-session-week-{{ appt.id }}">
+                  <div class="avatar">{{ appt.patient.full_name|first }}</div>
+                  <div class="details">
+                    <p class="name">{{ appt.patient.full_name }}</p>
+                    <p class="info">{{ appt.date|date:"M d" }} – {{ appt.time|time:"P" }}</p>
+                  </div>
+                  <span class="tag">{{ appt.status|title }}</span>
+                </div>
+                {% endfor %}
+              {% else %}
+                <p id="no-week-msg">No schedule this week.</p>
+              {% endif %}
+            </div>
+          </div>
+
+        </div>
+
+        <!-- RIGHT COLUMN -->
+        <div class="right-column">
+
+          <!-- WEEKLY SUMMARY -->
+          <div class="card small-card">
+            <h2>This Week</h2>
+            <ul class="stats">
+              <li>
+                <span><i class="fa-solid fa-users"></i> Total Patients</span>
+                <strong>{{ weekly_total_patients }}</strong>
+              </li>
+              <li>
+                <span><i class="fa-solid fa-calendar"></i> Sessions</span>
+                <strong>{{ weekly_sessions }}</strong>
+              </li>
+              <li>
+                <span><i class="fa-solid fa-star"></i> Average Rating</span>
+                <strong>{{ weekly_avg_rating }}</strong>
+              </li>
+            </ul>
+          </div>
+
+          <!-- QUICK ACTIONS -->
+          <div class="card small-card">
+            <h2>Quick Actions</h2>
+            <a href="{% url 'manage_availability' %}" class="quick-action">
+              <span class="icon"><i class="fa-solid fa-calendar"></i></span>
+              Manage Availability
+            </a>
+            <a href="{% url 'patient_records' %}" class="quick-action">
+              <span class="icon"><i class="fa-solid fa-file-invoice"></i></span>
+              View Patient Records
+            </a>
+            <a href="{% url 'counselor_profile_update' %}" class="quick-action">
+              <span class="icon"><i class="fa-solid fa-gear"></i></span>
+              Update Profile
+            </a>
+          </div>
+
+          <!-- RECENT FEEDBACK -->
+          <div class="card small-card">
+            <h2>Recent Feedback</h2>
+            {% if recent_feedback %}
+              {% for fb in recent_feedback %}
+              <div class="feedback">
+                <p class="quote">"{{ fb.message|truncatewords:20 }}"</p>
+                <p class="client">
+                  {% if fb.rating %}
+                    <i class="fa-solid fa-star" style="color:var(--amber);"></i> {{ fb.rating }} 
+                  {% else %}
+                    No rating 
+                  {% endif %}
+                  – User #{{ fb.patient.id }}
+                </p>
+              </div>
+              {% endfor %}
+            {% else %}
+              <p>No feedback available yet.</p>
+            {% endif %}
+          </div>
+
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script src="{% static 'core/js/counselordashboard.js' %}"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script>
+    function startSession(appointmentId) {
+      Swal.fire({
+        title: 'Start Session?',
+        text: 'This will create a secure video call room for you and your client.',
+        icon: 'info',
+        showCancelButton: true,
+        confirmButtonText: 'Start',
+        cancelButtonText: 'Cancel'
+      }).then((result) => {
+        if (result.isConfirmed) {
+          Swal.fire({
+            title: 'Creating room...',
+            text: 'Setting up your secure video session.',
+            allowOutsideClick: false,
+            showConfirmButton: false,
+            didOpen: () => Swal.showLoading()
+          });
+          fetch(`/core/start-session/${appointmentId}/`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-CSRFToken': '{{ csrf_token }}' },
+            body: JSON.stringify({})
+          })
+          .then(response => response.json())
+          .then(data => {
+            if (data.success) {
+              window.location.href = data.join_url;
+            } else {
+              Swal.fire('Error!', data.message || 'Something went wrong.', 'error');
+            }
+          })
+          .catch(err => {
+            console.error(err);
+            Swal.fire('Error!', 'Something went wrong.', 'error');
+          });
+        }
+      });
+    }
+
+    function endSession(appointmentId) {
+      Swal.fire({
+        title: 'Session Notes',
+        input: 'textarea',
+        inputPlaceholder: 'Write your notes for the client...',
+        showCancelButton: true,
+        confirmButtonText: 'Save Notes',
+        cancelButtonText: 'Cancel'
+      }).then((result) => {
+        if (result.isConfirmed && result.value) {
+          fetch(`/core/end-session/${appointmentId}/`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-CSRFToken': '{{ csrf_token }}' },
+            body: JSON.stringify({ notes: result.value })
+          })
+          .then(res => res.json())
+          .then(data => {
+            if (data.success) {
+              Swal.fire('Saved!', 'Session notes saved successfully.', 'success').then(() => location.reload());
+            } else {
+              Swal.fire('Error', data.message || 'Failed to save notes.', 'error');
+            }
+          })
+          .catch(err => console.error(err));
+        }
+      });
+    }
+
+    function clearWeekSchedule() {
+      Swal.fire({
+        title: 'Clear This Week?',
+        text: 'This will cancel all pending appointments for this week.',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Clear Pending Appointments',
+        cancelButtonText: 'Cancel'
+      }).then((result) => {
+        if (result.isConfirmed) {
+          fetch('/core/api/counselor/clear-week-schedule/', {
+            method: 'POST',
+            headers: { 'X-CSRFToken': '{{ csrf_token }}' }
+          })
+          .then(res => res.json())
+          .then(data => {
+            if (data.success) {
+              Swal.fire('Cleared!', `${data.cancelled} appointment(s) cancelled.`, 'success')
+                .then(() => location.reload());
+            } else {
+              Swal.fire('Error', 'Could not clear appointments.', 'error');
+            }
+          })
+          .catch(() => Swal.fire('Error', 'Network error.', 'error'));
+        }
+      });
+    }
+  </script>
+  <script>
+    window.AI_USER_NAME = "{{ user.full_name|default:user.get_username|escapejs }}";
+  </script>
+
+  <script>
+    // Global Counselor Booking Notification
+    (function() {
+      const counselorId = "{{ request.user.id }}";
+      if (!counselorId || counselorId === "None") return;
+      const wsProtocol = window.location.protocol === "https:" ? "wss://" : "ws://";
+      const notifySocket = new WebSocket(`${wsProtocol}${window.location.host}/ws/session/notifications/${counselorId}/`);
+
+      notifySocket.onmessage = function (e) {
+        const data = JSON.parse(e.data);
+        if (data.type === "appointment_booked") {
+          const isDashboard = window.location.pathname === "{% url 'counselor_dashboard' %}";
+          
+          Swal.fire({
+            title: 'New Session Booked!',
+            html: `A user has booked a session with you on <b>${data.date}</b> at <b>${data.time}</b>.`,
+            icon: 'success',
+            showCancelButton: !isDashboard,
+            confirmButtonText: 'Okay',
+            cancelButtonText: 'Go To My Dashboard',
+            reverseButtons: true
+          }).then((result) => {
+            if (!isDashboard && result.dismiss === Swal.DismissReason.cancel) {
+               window.location.href = "{% url 'counselor_dashboard' %}";
+            }
+          });
+
+          if (isDashboard && typeof window.addAppointmentCard === "function") {
+             window.addAppointmentCard(data);
+          }
+        } else if (data.type === "appointment_cancelled") {
+          const isDashboard = window.location.pathname === "{% url 'counselor_dashboard' %}";
+          
+          Swal.fire({
+            title: 'Session Cancelled',
+            html: `The user <b>${data.patient_name}</b> has cancelled their session on <b>${data.date}</b> at <b>${data.time}</b>.`,
+            icon: 'info',
+            showCancelButton: !isDashboard,
+            confirmButtonText: 'Okay',
+            cancelButtonText: 'Go To Dashboard',
+            reverseButtons: true
+          }).then((result) => {
+            if (!isDashboard && result.dismiss === Swal.DismissReason.cancel) {
+               window.location.href = "{% url 'counselor_dashboard' %}";
+            }
+          });
+
+          if (isDashboard && typeof window.removeAppointmentCard === "function") {
+             window.removeAppointmentCard(data.appointment_id);
+          }
+        }
+      };
+    })();
+  </script>
+</body>
+</html>

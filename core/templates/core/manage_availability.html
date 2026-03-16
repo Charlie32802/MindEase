@@ -1,0 +1,136 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Manage Availability | MindEase</title>
+  <link rel="stylesheet" href="{% static 'core/css/manage_availability.css' %}">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body>
+  <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+
+  <header class="header">
+    <a href="{% url 'counselor_dashboard' %}" class="logo">
+      <img src="{% static 'accounts/images/logo.png' %}" alt="Logo">
+      <span>MindEase</span>
+    </a>
+  </header>
+
+  <main class="page-container">
+    <a href="{% url 'counselor_dashboard' %}" class="back-link">
+      <i class="fa-solid fa-arrow-left"></i> Back to Dashboard
+    </a>
+
+    <section class="section-header">
+      <h1>Manage Availability</h1>
+      <p>Set your schedule and manage appointment slots</p>
+    </section>
+
+    <div class="availability-grid">
+      <!-- LEFT COLUMN WRAPPER -->
+      <div class="left-column" style="display: flex; flex-direction: column; gap: 20px;">
+        <div class="left-panel glass-box">
+        <div class="top-controls">
+          <button id="addSlotBtn" class="btn-add">
+            <i class="fa-solid fa-plus"></i> Add Time Slot
+          </button>
+        </div>
+        <div id="timeSlotList" class="time-slot-list">
+          <p id="slotFallback">Loading slots...</p>
+        </div>
+      </div>
+
+      <!-- VACATION CONTAINER -->
+      <div class="left-panel glass-box" style="animation-delay: 0.12s;">
+        <h3 class="vacation-title"><i class="fa-solid fa-umbrella-beach" style="color:var(--amber);margin-right:6px;"></i>My Vacations</h3>
+        <div id="vacationList" class="vacation-list">
+          <p id="vacationFallback" style="font-size:13px;color:var(--text-muted);font-style:italic;">No vacations set.</p>
+        </div>
+      </div>
+
+      <!-- QUICK SETTINGS -->
+      <div class="left-panel glass-box quick-settings" style="animation-delay: 0.15s;">
+        <h3><i class="fa-solid fa-gear" style="color:var(--teal);margin-right:6px;"></i>Quick Settings</h3>
+        <div style="display:flex; gap:10px; margin-top:10px; flex-wrap:wrap;">
+          <button id="copyLastWeekBtn" class="btn-outline" style="flex:1;">Copy Last Week</button>
+          <button id="clearScheduleBtn" class="btn-outline" style="flex:1;">Clear Schedule</button>
+          <button id="vacationModeBtn" class="btn-outline" style="flex:1;">Set Vacation Mode</button>
+        </div>
+      </div>
+      </div> <!-- End left-column -->
+
+      <div class="right-panel">
+        <div class="glass-box summary-box">
+          <h3>Weekly Summary</h3>
+          <ul id="weeklySummary"></ul>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script src="{% static 'core/js/manage_availability.js' %}"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+  <script>
+    // Global Counselor Booking Notification
+    (function() {
+      const counselorId = "{{ request.user.id }}";
+      if (!counselorId || counselorId === "None") return;
+      const wsProtocol = window.location.protocol === "https:" ? "wss://" : "ws://";
+      const notifySocket = new WebSocket(`${wsProtocol}${window.location.host}/ws/session/notifications/${counselorId}/`);
+
+      notifySocket.onmessage = function (e) {
+        const data = JSON.parse(e.data);
+        if (data.type === "appointment_booked") {
+          const isDashboard = window.location.pathname === "{% url 'counselor_dashboard' %}";
+          
+          Swal.fire({
+            title: 'New Session Booked!',
+            html: `A user has booked a session with you on <b>${data.date}</b> at <b>${data.time}</b>.`,
+            icon: 'success',
+            showCancelButton: !isDashboard,
+            confirmButtonText: 'Okay',
+            cancelButtonText: 'Go To My Dashboard',
+            reverseButtons: true
+          }).then((result) => {
+            if (!isDashboard && result.dismiss === Swal.DismissReason.cancel) {
+               window.location.href = "{% url 'counselor_dashboard' %}";
+            }
+          });
+
+          if (isDashboard && typeof window.addAppointmentCard === "function") {
+             window.addAppointmentCard(data);
+          }
+        } else if (data.type === "appointment_cancelled") {
+          const isDashboard = window.location.pathname === "{% url 'counselor_dashboard' %}";
+          
+          Swal.fire({
+            title: 'Session Cancelled',
+            html: `The user <b>${data.patient_name}</b> has cancelled their session on <b>${data.date}</b> at <b>${data.time}</b>.`,
+            icon: 'info',
+            showCancelButton: !isDashboard,
+            confirmButtonText: 'Okay',
+            cancelButtonText: 'Go To Dashboard',
+            reverseButtons: true
+          }).then((result) => {
+            if (!isDashboard && result.dismiss === Swal.DismissReason.cancel) {
+               window.location.href = "{% url 'counselor_dashboard' %}";
+            }
+          });
+
+          if (isDashboard && typeof window.removeAppointmentCard === "function") {
+             window.removeAppointmentCard(data.appointment_id);
+          }
+        }
+      };
+    })();
+  </script>
+</body>
+</html>

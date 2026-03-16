@@ -1,0 +1,349 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Update Counselor Profile | MindEase</title>
+  <link rel="stylesheet" href="{% static 'core/css/counselor_profile_update.css' %}">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+  <style>
+    .spec-group { position: relative !important; }
+    .specialization-options {
+      display: none;
+      position: absolute !important;
+      top: calc(100% + 6px) !important;
+      left: 0 !important;
+      width: 100% !important;
+      z-index: 99999 !important;
+      background: #1a2540;
+      border: 1px solid rgba(96, 165, 250, 0.40);
+      border-radius: 12px;
+      padding: 16px;
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.40);
+      max-height: 300px;
+      overflow-y: auto;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 10px;
+    }
+    .specialization-options.open { display: grid !important; }
+    .specialization-option {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 14px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 10px;
+      cursor: pointer;
+      transition: border-color 0.18s ease;
+    }
+    .specialization-option:hover { border-color: rgba(96, 165, 250, 0.40); }
+    .specialization-option input[type="checkbox"] { accent-color: #60a5fa; width: 16px; height: 16px; cursor: pointer; flex-shrink: 0; }
+    .specialization-option label { cursor: pointer; font-weight: 500; font-size: 13px; color: rgba(210, 225, 255, 0.75); flex: 1; }
+    .other-concerns-container { grid-column: 1/-1; padding: 12px 14px; background: rgba(96, 165, 250, 0.06); border-radius: 10px; }
+    .other-concerns-container input {
+      width: 100%;
+      border: 1px solid rgba(255, 255, 255, 0.13);
+      border-radius: 8px;
+      padding: 9px 12px;
+      font-size: 13px;
+      background: rgba(255, 255, 255, 0.06);
+      color: #f0f4ff;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+    .other-concerns-container input::placeholder { color: rgba(180, 200, 240, 0.40); }
+    .show { display: block !important; }
+    .hide { display: none !important; }
+  </style>
+</head>
+
+<body>
+  <header class="header">
+    <a href="{% url 'counselor_dashboard' %}" class="logo">
+      <img src="{% static 'accounts/images/logo.png' %}" alt="Logo">
+      <span>MindEase</span>
+    </a>
+  </header>
+
+  <main class="container">
+    <div class="back-row">
+      <a href="{% url 'counselor_dashboard' %}" class="back-link">
+        <i class="fa-solid fa-arrow-left"></i> Back to Dashboard
+      </a>
+    </div>
+
+    <section class="page-header">
+      <h1 class="page-title">Update Profile</h1>
+      <p class="page-subtitle">Manage your professional information</p>
+    </section>
+
+    <div class="profile-grid">
+
+      <form id="profile-form" method="POST" class="profile-form">
+        {% csrf_token %}
+
+        <div class="avatar-row">
+          <div class="avatar-circle">{{ user.full_name|default:"?"|slice:":1" }}</div>
+        </div>
+
+        <div class="form-group">
+          <label>Full Name</label>
+          <input name="fullname" value="{{ user.full_name|default:'' }}">
+        </div>
+
+        <div class="form-group">
+          <label>Email</label>
+          <input name="email" value="{{ user.email|default:'' }}">
+        </div>
+
+        <div class="form-group">
+          <label>Years of Experience</label>
+          <input name="experience" value="{{ user.years_experience|default:'' }}">
+        </div>
+
+        <div class="form-group">
+          <label>License No.</label>
+          <input name="license_number" value="{{ user.license_number|default:'' }}">
+        </div>
+
+        <div class="form-group">
+          <label>Education</label>
+          <input name="institution_name" value="{{ user.institution_name|default:'' }}">
+        </div>
+
+        <div class="form-group">
+          <label>Professional Bio</label>
+          <textarea name="bio">{{ user.bio|default:'' }}</textarea>
+        </div>
+
+        <div class="form-group spec-group">
+          <label>Specializations</label>
+          <div class="specialization-toggle" id="specToggle" onclick="toggleSpecializationOptions()">
+            <span id="specialization-text">Select Specializations</span>
+            <span id="specialization-icon"><i class="fa-solid fa-chevron-down"></i></span>
+          </div>
+          <div class="specialization-options" id="specializationOptions">
+            {% for spec in specializations %}
+            <div class="specialization-option">
+              <input type="checkbox" id="spec_{{ forloop.counter }}" name="specializations" value="{{ spec }}"
+                {% if spec in user.get_specializations_list %}checked{% endif %}>
+              <label for="spec_{{ forloop.counter }}">{{ spec }}</label>
+            </div>
+            {% endfor %}
+            <div id="other-concerns-input-container"
+              class="other-concerns-container {% if 'Other Mild Concerns' in user.get_specializations_list %}show{% else %}hide{% endif %}">
+              <input type="text" name="other_concerns" placeholder="Describe other concerns" value="{{ user.other_specializations|default:'' }}">
+            </div>
+          </div>
+        </div>
+
+        <button type="submit" class="save-btn">
+          <i class="fa-solid fa-floppy-disk"></i> Save Changes
+        </button>
+      </form>
+
+      <div class="profile-side">
+        <div class="card profile-status">
+          <h3 class="card-title"><i class="fa-solid fa-user"></i> Profile Status</h3>
+          <div class="stats">
+            <p>Profile Views <span>{{ profile_views|default:"0" }}</span></p>
+            <p>Rating <span>{{ avg_rating|default:"N/A" }} <i class="fa-solid fa-star"></i></span></p>
+            <p>Reviews <span>{{ review_count|default:"0" }}</span></p>
+          </div>
+        </div>
+
+        <div class="card credentials">
+          <h3 class="card-title"><i class="fa-solid fa-certificate"></i> Credentials</h3>
+          <button type="button" class="cred-btn" id="view-id-btn">
+            <i class="fa-solid fa-id-card"></i> View ID Licenses
+          </button>
+          <button type="button" class="cred-btn" id="view-cert-btn">
+            <i class="fa-solid fa-graduation-cap"></i> View Certificates
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <script src="{% static 'core/js/counselor_profile_update.js' %}"></script>
+  <script>
+    function toggleSpecializationOptions() {
+      const options = document.getElementById("specializationOptions");
+      const toggle  = document.getElementById("specToggle");
+      const icon    = document.getElementById("specialization-icon");
+      const isOpen  = options.classList.toggle("open");
+      toggle.classList.toggle("open", isOpen);
+      icon.innerHTML = isOpen
+        ? '<i class="fa-solid fa-chevron-up"></i>'
+        : '<i class="fa-solid fa-chevron-down"></i>';
+      updateSelectedCount();
+    }
+
+    function toggleOtherConcernsInput(checkbox) {
+      const container = document.getElementById("other-concerns-input-container");
+      container.classList.toggle("show", checkbox.checked);
+      container.classList.toggle("hide", !checkbox.checked);
+      updateSelectedCount();
+    }
+
+    function updateSelectedCount() {
+      const checked = document.querySelectorAll('input[name="specializations"]:checked');
+      let count = 0;
+      checked.forEach(cb => {
+        if (cb.value === 'Other Mild Concerns') {
+          const other = document.querySelector('input[name="other_concerns"]');
+          if (other && other.value.trim()) count++;
+        } else {
+          count++;
+        }
+      });
+      document.getElementById('specialization-text').textContent = count === 0
+        ? 'Select Specializations'
+        : `${count} Specialization${count !== 1 ? 's' : ''} Selected`;
+    }
+
+    document.addEventListener("DOMContentLoaded", function () {
+      updateSelectedCount();
+
+      document.querySelectorAll('.specialization-option').forEach(option => {
+        const checkbox = option.querySelector('input[type="checkbox"]');
+        option.addEventListener('click', function (e) {
+          if (e.target === checkbox || e.target.tagName === 'LABEL') return;
+          checkbox.checked = !checkbox.checked;
+          checkbox.dispatchEvent(new Event('change', { bubbles: true }));
+        });
+        checkbox.addEventListener('change', function () {
+          if (this.value === 'Other Mild Concerns') {
+            toggleOtherConcernsInput(this);
+          } else {
+            updateSelectedCount();
+          }
+        });
+      });
+
+      const otherInput = document.querySelector('input[name="other_concerns"]');
+      if (otherInput) otherInput.addEventListener('input', updateSelectedCount);
+
+      document.addEventListener('click', function (e) {
+        const options = document.getElementById("specializationOptions");
+        const toggle  = document.getElementById("specToggle");
+        if (options.classList.contains('open') &&
+            !options.contains(e.target) &&
+            !toggle.contains(e.target)) {
+          toggleSpecializationOptions();
+        }
+      });
+    });
+
+    document.getElementById("profile-form").addEventListener("submit", function (e) {
+      e.preventDefault();
+      const formData = new FormData(this);
+      fetch("{% url 'counselor_profile' %}", {
+        method: "POST",
+        headers: { "X-Requested-With": "XMLHttpRequest" },
+        body: formData
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.status === "success") {
+          Swal.fire({ title: "Profile Updated!", icon: "success", text: "Your changes have been saved." })
+          .then(() => {
+            document.querySelector('input[name="fullname"]').value   = data.full_name;
+            document.querySelector('input[name="email"]').value      = data.email;
+            document.querySelector('input[name="experience"]').value = data.years_experience || '';
+            document.querySelector('textarea[name="bio"]').value     = data.bio;
+          });
+        } else {
+          Swal.fire({ title: "Error!", icon: "error", text: "Failed to update profile." });
+        }
+      })
+      .catch(() => Swal.fire({ title: "Error!", icon: "error", text: "Something went wrong." }));
+    });
+
+    document.getElementById("view-id-btn").addEventListener("click", function () {
+      Swal.fire({
+        title: 'Professional ID',
+        imageUrl: "{% if user.professional_id %}{{ user.professional_id.url }}{% else %}{% static 'core/images/no-image.png' %}{% endif %}",
+        imageAlt: 'Professional ID',
+        imageWidth: 400,
+        imageHeight: 300,
+        showCloseButton: true,
+      });
+    });
+
+    document.getElementById("view-cert-btn").addEventListener("click", function () {
+      Swal.fire({
+        title: 'Degree Certificate',
+        imageUrl: "{% if user.degree_certificate %}{{ user.degree_certificate.url }}{% else %}{% static 'core/images/no-image.png' %}{% endif %}",
+        imageAlt: 'Degree Certificate',
+        imageWidth: 400,
+        imageHeight: 300,
+        showCloseButton: true,
+      });
+    });
+  </script>
+
+  <script>
+    // Global Counselor Booking Notification
+    (function() {
+      const counselorId = "{{ request.user.id }}";
+      if (!counselorId || counselorId === "None") return;
+      const wsProtocol = window.location.protocol === "https:" ? "wss://" : "ws://";
+      const notifySocket = new WebSocket(`${wsProtocol}${window.location.host}/ws/session/notifications/${counselorId}/`);
+
+      notifySocket.onmessage = function (e) {
+        const data = JSON.parse(e.data);
+        if (data.type === "appointment_booked") {
+          const isDashboard = window.location.pathname === "{% url 'counselor_dashboard' %}";
+          
+          Swal.fire({
+            title: 'New Session Booked!',
+            html: `A user has booked a session with you on <b>${data.date}</b> at <b>${data.time}</b>.`,
+            icon: 'success',
+            showCancelButton: !isDashboard,
+            confirmButtonText: 'Okay',
+            cancelButtonText: 'Go To My Dashboard',
+            reverseButtons: true
+          }).then((result) => {
+            if (!isDashboard && result.dismiss === Swal.DismissReason.cancel) {
+               window.location.href = "{% url 'counselor_dashboard' %}";
+            }
+          });
+
+          if (isDashboard && typeof window.addAppointmentCard === "function") {
+             window.addAppointmentCard(data);
+          }
+        } else if (data.type === "appointment_cancelled") {
+          const isDashboard = window.location.pathname === "{% url 'counselor_dashboard' %}";
+          
+          Swal.fire({
+            title: 'Session Cancelled',
+            html: `The user <b>${data.patient_name}</b> has cancelled their session on <b>${data.date}</b> at <b>${data.time}</b>.`,
+            icon: 'info',
+            showCancelButton: !isDashboard,
+            confirmButtonText: 'Okay',
+            cancelButtonText: 'Go To Dashboard',
+            reverseButtons: true
+          }).then((result) => {
+            if (!isDashboard && result.dismiss === Swal.DismissReason.cancel) {
+               window.location.href = "{% url 'counselor_dashboard' %}";
+            }
+          });
+
+          if (isDashboard && typeof window.removeAppointmentCard === "function") {
+             window.removeAppointmentCard(data.appointment_id);
+          }
+        }
+      };
+    })();
+  </script>
+</body>
+</html>

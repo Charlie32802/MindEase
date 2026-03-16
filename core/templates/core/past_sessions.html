@@ -1,0 +1,270 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Past Sessions | MindEase</title>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="{% static 'core/css/past_sessions.css' %}">
+</head>
+
+<body>
+
+  <header class="header">
+    <a href="{% url 'user_dashboard' %}" class="logo">
+      <img src="{% static 'accounts/images/logo.png' %}" alt="Logo">
+      <span>MindEase</span>
+    </a>
+  </header>
+
+  <div class="back-section">
+    <a href="{% url 'user_dashboard' %}" class="back-link">
+      <i class="fa-solid fa-arrow-left"></i> Back to Dashboard
+    </a>
+  </div>
+
+  <main class="main-container">
+    <h1 class="page-title">Past Sessions</h1>
+    <p class="subtitle">Review your session history and progress</p>
+
+    <!-- Sort Filter -->
+    <div class="sort-bar">
+      <label><i class="fa-solid fa-sort"></i> Sort by:</label>
+      <div class="custom-dropdown" id="sortDropdown" style="width: 140px;">
+        <div class="dropdown-toggle" id="sortToggle" onclick="toggleSortDropdown()">
+          <span id="sortText">Latest</span>
+          <i class="fa-solid fa-chevron-down dropdown-icon"></i>
+        </div>
+        <div class="dropdown-menu" id="sortMenu">
+          <div class="dropdown-item active" data-value="latest">Latest</div>
+          <div class="dropdown-item" data-value="oldest">Oldest</div>
+          <div class="dropdown-item" data-value="a-z">A → Z</div>
+          <div class="dropdown-item" data-value="z-a">Z → A</div>
+        </div>
+      </div>
+      <input type="hidden" id="sortSelect" value="latest">
+    </div>
+
+    <div class="sessions-container" id="sessionList"></div>
+  </main>
+
+  <!-- Other Mild Concerns Modal -->
+  <div class="modal-overlay" id="otherConcernsOverlay">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3>Other Mild Concerns</h3>
+        <button class="modal-close" id="otherConcernsClose">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p id="otherConcernsText" style="color:var(--text-primary); line-height:1.6; word-wrap:break-word;"></p>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+  <script>
+    const sessionList = document.getElementById('sessionList');
+    const sortSelect = document.getElementById('sortSelect');
+    
+    let currentPage = 1;
+    let isLoading = false;
+    let hasMore = true;
+    let currentSort = 'latest';
+
+    // Intersection Observer for infinite scrolling
+    const observer = new IntersectionObserver((entries) => {
+      if (entries[0].isIntersecting && hasMore && !isLoading) {
+        loadSessions(currentPage + 1);
+      }
+    }, { rootMargin: '100px' });
+
+    // Custom Dropdown logic
+    function toggleSortDropdown() {
+      document.getElementById('sortMenu').classList.toggle('show');
+    }
+
+    document.querySelectorAll('#sortMenu .dropdown-item').forEach(item => {
+      item.addEventListener('click', function() {
+        document.querySelectorAll('#sortMenu .dropdown-item').forEach(d => d.classList.remove('active'));
+        this.classList.add('active');
+        
+        const value = this.getAttribute('data-value');
+        const text = this.textContent;
+        
+        document.getElementById('sortText').textContent = text;
+        document.getElementById('sortSelect').value = value;
+        document.getElementById('sortMenu').classList.remove('show');
+        
+        // Trigger sort change handler manually
+        currentSort = value;
+        currentPage = 1;
+        hasMore = true;
+        sessionList.innerHTML = '';
+        loadSessions(1);
+      });
+    });
+
+    // Close dropdown when clicking outside
+    window.addEventListener('click', function(e) {
+      if (!document.getElementById('sortDropdown').contains(e.target)) {
+        document.getElementById('sortMenu').classList.remove('show');
+      }
+    });
+
+    async function loadSessions(page = 1) {
+      if (isLoading) return;
+      isLoading = true;
+      
+      try {
+        const res = await fetch(`/core/api/past-sessions/?page=${page}&per_page=10&sort=${currentSort}`);
+        const data = await res.json();
+        
+        currentPage = page;
+        hasMore = data.has_more;
+        
+        if (data.sessions.length === 0 && page === 1) {
+          sessionList.innerHTML = '<p class="empty-state">No past sessions found. Ready to start your journey?</p>';
+        } else {
+          data.sessions.forEach(s => {
+            const card = document.createElement('div');
+            card.className = 'session-card';
+            
+            // Status pill
+            let statusPill = '';
+            if (s.status === 'completed') {
+               statusPill = '<span class="pill pill-completed">Completed</span>';
+            } else if (s.status === 'started') {
+               statusPill = '<span class="pill pill-started">In Progress</span>';
+            } else {
+               statusPill = '<span class="pill pill-pending">Pending</span>';
+            }
+
+            // Rating display
+            let ratingHtml = '';
+            if (s.rating && s.rating > 0) {
+              let starsHtml = '';
+              for (let i = 1; i <= 5; i++) {
+                starsHtml += i <= s.rating
+                  ? '<i class="fa-solid fa-star" style="color:#f59e0b;"></i>'
+                  : '<i class="fa-solid fa-star" style="color:#374151;"></i>';
+              }
+              ratingHtml = `<span class="rating-display">Your rating: ${starsHtml}</span>`;
+            } else {
+              ratingHtml = '<span class="rating-display rating-na">Your rating: N/A</span>';
+            }
+
+            // Feedback message
+            let feedbackHtml = '';
+            if (s.feedback_message) {
+              const safeMsg = s.feedback_message.length > 120
+                ? s.feedback_message.substring(0, 120) + '...'
+                : s.feedback_message;
+              feedbackHtml = `
+                <div class="feedback-msg">
+                  <i class="fa-solid fa-quote-left" style="color:var(--accent);margin-right:6px;font-size:11px;"></i>
+                  <span>${safeMsg}</span>
+                </div>`;
+            }
+
+            // Specialization tags
+            let specsHtml = '';
+            if (s.specializations && s.specializations.length > 0) {
+              specsHtml = '<div class="spec-tags">';
+              s.specializations.forEach(spec => {
+                if (spec === 'Other Mild Concerns' && s.other_specializations) {
+                  const safeText = s.other_specializations.replace(/'/g, "\\'").replace(/"/g, "&quot;").replace(/\n/g, " ");
+                  specsHtml += `<span class="spec-tag spec-tag-other" onclick="openOtherConcerns('${safeText}')" title="Click to read full description">${spec}</span>`;
+                } else {
+                  specsHtml += `<span class="spec-tag">${spec}</span>`;
+                }
+              });
+              specsHtml += '</div>';
+            }
+
+            card.innerHTML = `
+              <div class="card-top">
+                <div class="card-left">
+                  <div class="avatar">${s.counselor_initial}</div>
+                  <div class="info">
+                    <h3 class="name">${s.counselor_name} ${statusPill}</h3>
+                    <p class="role">Licensed Counselor</p>
+                  </div>
+                </div>
+              </div>
+              ${specsHtml}
+              <div class="meta">
+                <p><i class="fa-solid fa-calendar"></i> ${s.date}</p>
+                <p><i class="fa-solid fa-clock"></i> ${s.time} &bull; ${s.duration_text}</p>
+                <p><i class="fa-solid fa-comment-dots"></i> Video Session</p>
+              </div>
+              ${feedbackHtml}
+              <div class="actions">
+                ${ratingHtml}
+              </div>
+            `;
+            sessionList.appendChild(card);
+          });
+        }
+
+        // Clean up old sentinel
+        const oldSentinel = document.getElementById('sentinel');
+        if (oldSentinel) {
+          observer.unobserve(oldSentinel);
+          oldSentinel.remove();
+        }
+
+        // Add new sentinel if more to load
+        if (hasMore) {
+          const sentinel = document.createElement('div');
+          sentinel.id = 'sentinel';
+          sentinel.style.height = '20px';
+          sentinel.style.marginTop = '20px';
+          sessionList.appendChild(sentinel);
+          observer.observe(sentinel);
+        }
+        
+      } catch (err) {
+        console.error('Error loading past sessions:', err);
+      } finally {
+        isLoading = false;
+      }
+    }
+
+    // Other Mild Concerns Modal
+    function openOtherConcerns(text) {
+      document.getElementById('otherConcernsText').textContent = text;
+      document.getElementById('otherConcernsOverlay').classList.add('show');
+    }
+
+    document.getElementById('otherConcernsClose').addEventListener('click', () => {
+      document.getElementById('otherConcernsOverlay').classList.remove('show');
+    });
+    document.getElementById('otherConcernsOverlay').addEventListener('click', (e) => {
+      if (e.target === e.currentTarget) {
+        document.getElementById('otherConcernsOverlay').classList.remove('show');
+      }
+    });
+
+    // Initial load
+    document.addEventListener('DOMContentLoaded', () => {
+      loadSessions(1);
+    });
+  </script>
+
+  <script>
+    window.AI_USER_NAME = "{{ user.full_name|default:user.get_username|escapejs }}";
+  </script>
+
+  {% if user.is_authenticated %}
+  {% include 'ai_companion/widget.html' %}
+  {% endif %}
+
+</body>
+</html>

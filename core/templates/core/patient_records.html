@@ -1,0 +1,259 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+
+<head>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Patient Records — MindEase</title>
+  <link rel="stylesheet" href="{% static 'core/css/patient_records.css' %}">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body>
+  <header class="header">
+    <a href="{% url 'counselor_dashboard' %}" class="logo">
+      <img src="{% static 'accounts/images/logo.png' %}" alt="Logo">
+      <span>MindEase</span>
+    </a>
+  </header>
+
+  <main class="me-main">
+    <div class="me-container">
+      <div class="me-back">
+        <a href="{% url 'counselor_dashboard' %}" class="me-back-link">
+          <i class="fa-solid fa-arrow-left"></i> Back to Dashboard
+        </a>
+      </div>
+
+      <section class="me-top">
+        <div class="me-top-left">
+          <h1 class="me-title">Patient Records</h1>
+          <p class="me-sub">View all past sessions and notes</p>
+        </div>
+        <div class="me-search-wrap">
+          <div class="me-search">
+            <i class="fa-solid fa-magnifying-glass me-search-icon"></i>
+            <input id="sessionSearch" class="me-search-input" placeholder="Search sessions by patient name..."
+              type="search" autocomplete="off" />
+          </div>
+        </div>
+      </section>
+
+      <ul id="sessionList" class="me-list">
+        {% for s in sessions %}
+        <li class="me-card" data-name="{{ s.patient.full_name }}">
+          <div class="me-card-left">
+            <div class="me-avatar">{{ s.patient.full_name|slice:":1" }}</div>
+            <div class="me-info">
+              <div class="me-name-row">
+                <h3 class="me-name">{{ s.patient.full_name }}</h3>
+                {% if s.status == "completed" %}
+                  <span class="me-pill pill-completed">Completed</span>
+                {% elif s.status == "started" %}
+                  <span class="me-pill pill-started">In Progress</span>
+                {% elif s.status == "cancelled" %}
+                  <span class="me-pill pill-cancelled" style="background: rgba(239, 68, 68, 0.1); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.2);">Cancelled</span>
+                {% else %}
+                  <span class="me-pill pill-pending">Pending</span>
+                {% endif %}
+              </div>
+              <div class="me-meta">
+                <span class="meta-item"><i class="fa-solid fa-calendar"></i> {{ s.date|date:"M d, Y" }}</span>
+                <span class="meta-dot">·</span>
+                <span class="meta-item"><i class="fa-solid fa-clock"></i> {{ s.time|time:"h:i A" }} &bull; {{ s.duration_text }}</span>
+              </div>
+            </div>
+          </div>
+          <div class="me-card-right">
+            <button class="btn btn-outline view-notes" data-notes="{{ s.counselor_notes|default:'No notes yet.' }}">
+              View Notes
+            </button>
+          </div>
+        </li>
+        {% empty %}
+        <p class="empty-state">No sessions found.</p>
+        {% endfor %}
+      </ul>
+    </div>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script>
+    const searchInput = document.getElementById('sessionSearch');
+    const sessionList = document.getElementById('sessionList');
+    
+    let currentPage = 1;
+    let isLoading = false;
+    let hasMore = true;
+    let currentSearch = '';
+
+    // Intersection Observer for infinite scrolling
+    const observer = new IntersectionObserver((entries) => {
+      if (entries[0].isIntersecting && hasMore && !isLoading) {
+        loadSessions(currentPage + 1);
+      }
+    }, { rootMargin: '100px' });
+
+    async function loadSessions(page = 1, reset = false) {
+      if (isLoading) return;
+      isLoading = true;
+      
+      try {
+        const res = await fetch(`/core/api/patients/?page=${page}&per_page=10&search=${encodeURIComponent(currentSearch)}`);
+        const data = await res.json();
+        
+        if (reset) {
+          sessionList.innerHTML = '';
+          currentPage = 1;
+        } else {
+          currentPage = page;
+        }
+        
+        hasMore = data.has_more;
+        
+        if (data.sessions.length === 0 && reset) {
+          sessionList.innerHTML = '<p class="empty-state">No sessions found.</p>';
+        } else {
+          data.sessions.forEach(s => {
+            const li = document.createElement('li');
+            li.className = 'me-card';
+            li.dataset.name = s.patient_name;
+            
+            let statusPill = '';
+            if (s.status === 'completed') statusPill = '<span class="me-pill pill-completed">Completed</span>';
+            else if (s.status === 'started') statusPill = '<span class="me-pill pill-started">In Progress</span>';
+            else if (s.status === 'cancelled') statusPill = '<span class="me-pill pill-cancelled" style="background: rgba(239, 68, 68, 0.1); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.2);">Cancelled</span>';
+            else statusPill = '<span class="me-pill pill-pending">Pending</span>';
+
+            const notesText = s.counselor_notes || 'No notes yet.';
+            // escape single quotes for the inline onclick handler
+            const safeNotes = notesText.replace(/'/g, "\\'").replace(/"/g, "&quot;").replace(/\n/g, "<br>");
+            
+            li.innerHTML = `
+              <div class="me-card-left">
+                <div class="me-avatar">${s.patient_initial}</div>
+                <div class="me-info">
+                  <div class="me-name-row">
+                    <h3 class="me-name">${s.patient_name}</h3>
+                    ${statusPill}
+                  </div>
+                  <div class="me-meta">
+                    <span class="meta-item"><i class="fa-solid fa-calendar"></i> ${s.date}</span>
+                    <span class="meta-dot">·</span>
+                    <span class="meta-item"><i class="fa-solid fa-clock"></i> ${s.time} &bull; ${s.duration_text}</span>
+                  </div>
+                </div>
+              </div>
+              <div class="me-card-right">
+                <button class="btn btn-outline view-notes" onclick="window._showNotes('${safeNotes}')">
+                  View Notes
+                </button>
+              </div>
+            `;
+            sessionList.appendChild(li);
+          });
+        }
+
+        // Clean up old sentinel logic
+        const oldSentinel = document.getElementById('sentinel');
+        if (oldSentinel) {
+          observer.unobserve(oldSentinel);
+          oldSentinel.remove();
+        }
+
+        // Add new sliding sentinel if more to load
+        if (hasMore) {
+          const sentinel = document.createElement('div');
+          sentinel.id = 'sentinel';
+          sentinel.style.height = '20px';
+          sentinel.style.marginTop = '20px';
+          sessionList.appendChild(sentinel);
+          observer.observe(sentinel);
+        }
+        
+      } catch (err) {
+        console.error('Error loading patient records:', err);
+      } finally {
+        isLoading = false;
+      }
+    }
+
+    searchInput.addEventListener('input', (e) => {
+      currentSearch = e.target.value;
+      loadSessions(1, true);
+    });
+
+    window._showNotes = function(notes) {
+      Swal.fire({
+        title: 'Session Notes',
+        html: `<p>${notes}</p>`,
+        icon: 'info',
+        confirmButtonText: 'Close'
+      });
+    };
+
+    // Initial load
+    document.addEventListener('DOMContentLoaded', () => {
+      loadSessions(1, true);
+    });
+  </script>
+  <script>
+    // Global Counselor Booking Notification
+    (function() {
+      const counselorId = "{{ request.user.id }}";
+      if (!counselorId || counselorId === "None") return;
+      const wsProtocol = window.location.protocol === "https:" ? "wss://" : "ws://";
+      const notifySocket = new WebSocket(`${wsProtocol}${window.location.host}/ws/session/notifications/${counselorId}/`);
+
+      notifySocket.onmessage = function (e) {
+        const data = JSON.parse(e.data);
+        if (data.type === "appointment_booked") {
+          const isDashboard = window.location.pathname === "{% url 'counselor_dashboard' %}";
+          
+          Swal.fire({
+            title: 'New Session Booked!',
+            html: `A user has booked a session with you on <b>${data.date}</b> at <b>${data.time}</b>.`,
+            icon: 'success',
+            showCancelButton: !isDashboard,
+            confirmButtonText: 'Okay',
+            cancelButtonText: 'Go To My Dashboard',
+            reverseButtons: true
+          }).then((result) => {
+            if (!isDashboard && result.dismiss === Swal.DismissReason.cancel) {
+               window.location.href = "{% url 'counselor_dashboard' %}";
+            }
+          });
+
+          if (isDashboard && typeof window.addAppointmentCard === "function") {
+             window.addAppointmentCard(data);
+          }
+        } else if (data.type === "appointment_cancelled") {
+          const isDashboard = window.location.pathname === "{% url 'counselor_dashboard' %}";
+          
+          Swal.fire({
+            title: 'Session Cancelled',
+            html: `The user <b>${data.patient_name}</b> has cancelled their session on <b>${data.date}</b> at <b>${data.time}</b>.`,
+            icon: 'info',
+            showCancelButton: !isDashboard,
+            confirmButtonText: 'Okay',
+            cancelButtonText: 'Go To Dashboard',
+            reverseButtons: true
+          }).then((result) => {
+            if (!isDashboard && result.dismiss === Swal.DismissReason.cancel) {
+               window.location.href = "{% url 'counselor_dashboard' %}";
+            }
+          });
+
+          if (isDashboard && typeof window.removeAppointmentCard === "function") {
+             window.removeAppointmentCard(data.appointment_id);
+          }
+        }
+      };
+    })();
+  </script>
+</body>
+</html>

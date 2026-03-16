@@ -1,0 +1,159 @@
+{% extends "admin_panel/base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="admin-dashboard-wrapper">
+    <div class="admin-dashboard-content" id="container">
+        <div class="dashboard-header">
+            <h1>{{ site_title|default:'Django Administration' }}</h1>
+            <p>Manage users, counselors, and platform activity</p>
+        </div>
+
+        <div class="main-dashboard-container">
+            <div class="dashboard-left">
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="icon-circle users-icon">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M17 21V19C17 17.9391 16.5786 16.9217 15.8284 16.1716C15.0783 15.4214 14.0609 15 13 15H5C3.93913 15 2.92172 15.4214 2.17157 16.1716C1.42143 16.9217 1 17.9391 1 19V21" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                <path d="M9 11C11.2091 11 13 9.20914 13 7C13 4.79086 11.2091 3 9 3C6.79086 3 5 4.79086 5 7C5 9.20914 6.79086 11 9 11Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                <path d="M23 21V19C22.9993 18.1137 22.7044 17.2528 22.1614 16.5523C21.6184 15.8519 20.8581 15.3516 20 15.13" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                <path d="M16 3.13C16.8604 3.3503 17.623 3.8507 18.1676 4.55231C18.7122 5.25392 19.0078 6.11683 19.0078 7.005C19.0078 7.89317 18.7122 8.75608 18.1676 9.45769C17.623 10.1593 16.8604 10.6597 16 10.88" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                        </div>
+                        <h3>Total Users</h3>
+                        <p class="value">{{ total_users }}</p>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="icon-circle counselors-icon">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M20 21V19C20 17.1399 19.2366 15.3613 17.8776 14.0516C16.5186 12.7419 14.6793 12 12.75 12H11.25C9.32066 12 7.48135 12.7419 6.12236 14.0516C4.76337 15.3613 4 17.1399 4 19V21" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                <path d="M12 11C14.2091 11 16 9.20914 16 7C16 4.79086 14.2091 3 12 3C9.79086 3 8 4.79086 8 7C8 9.20914 9.79086 11 12 11Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                        </div>
+                        <h3>Total Counselors</h3>
+                        <p class="value">{{ total_counselors }}</p>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="icon-circle sessions-icon">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                <path d="M12 6V12L16 14" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                        </div>
+                        <h3>Pending Counselors</h3>
+                        <p class="value">{{ pending_counselors }}</p>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="icon-circle reports-icon">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M14 2H6C5.46957 2 4.96086 2.21071 4.58579 2.58579C4.21071 2.96086 4 3.46957 4 4V20C4 20.5304 4.21071 21.0391 4.58579 21.4142C4.96086 21.7893 5.46957 22 6 22H18C18.5304 22 19.0391 21.7893 19.4142 21.4142C19.7893 21.0391 20 20.5304 20 20V8L14 2Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                <path d="M16 17H8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                <path d="M16 13H8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                <path d="M10 9H9H8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                <path d="M14 2V8H20" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                        </div>
+                        <h3>Total Admins</h3>
+                        <p class="value">{{ total_admins }}</p>
+                    </div>
+                </div>
+
+                <div class="admin-content">
+                    <div class="recent-activity">
+                        <div class="activity-module" data-has-pagination="{{ has_pagination|yesno:'true,false' }}" data-total-activities="{{ total_activities }}" data-total-pages="{{ total_pages|default:1 }}">
+                            <h2>Recent Activity</h2>
+                            {% if recent_activities %}
+                                {% for activity in recent_activities %}
+                                <div class="activity-item">
+                                    <div class="activity-icon" style="background: {{ activity.bg_color }}; color: {{ activity.text_color }};">{{ activity.icon|safe }}</div>
+                                    <div class="activity-content">
+                                        <p>{{ activity.description }}</p>
+                                        <div class="activity-time">{{ activity.time_since }}</div>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            {% else %}
+                            <div class="activity-item">
+                                <div class="activity-icon" style="background: rgba(102, 126, 234, 0.2); color: #667eea;"><i class="fas fa-clipboard-list"></i></div>
+                                <div class="activity-content">
+                                    <p>No recent activities yet. Activities will appear here when you approve/reject counselors or add new users.</p>
+                                    <div class="activity-time"></div>
+                                </div>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="system-feedback" style="margin-top: 2rem;">
+                        <div class="feedback-module" data-fb-has-pagination="{{ fb_has_pagination|yesno:'true,false' }}" data-fb-total-feedback="{{ total_feedback }}" data-fb-total-pages="{{ fb_total_pages|default:1 }}">
+                            <div class="feedback-header">
+                                <h2>Feedback</h2>
+                                <div class="custom-select" id="feedbackTypeSelect">
+                                    <div class="custom-select-selected">System Feedback ({{ total_sys_feedback }})</div>
+                                    <div class="custom-select-options">
+                                        <div class="custom-select-option selected" data-value="system">System Feedback ({{ total_sys_feedback }})</div>
+                                        <div class="custom-select-option" data-value="counselor">Counselor Feedback ({{ total_counselor_feedback }})</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div id="feedbackItemsContainer">
+                                {% if system_feedbacks %}
+                                    {% for fb in system_feedbacks %}
+                                    <div class="activity-item">
+                                        <div class="activity-icon" style="background: rgba(245, 158, 11, 0.2); color: #f59e0b;"><i class="fas fa-comment"></i></div>
+                                        <div class="activity-content">
+                                            <p><strong>{{ fb.name }}</strong>: {{ fb.message }}</p>
+                                            <div class="activity-time">{{ fb.time_since }}</div>
+                                        </div>
+                                    </div>
+                                    {% endfor %}
+                                {% else %}
+                                <div class="activity-item">
+                                    <div class="activity-icon" style="background: rgba(102, 126, 234, 0.2); color: #667eea;"><i class="fas fa-comment-slash"></i></div>
+                                    <div class="activity-content">
+                                        <p>No system feedback available yet.</p>
+                                        <div class="activity-time"></div>
+                                    </div>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="news-sidebar">
+                <div class="news-container">
+                    <div class="news-header">
+                        <h3><i class="fas fa-flag" style="color: #f59e0b;"></i> Philippines News</h3>
+                        <div class="news-indicator">
+                            <span class="live-dot"></span>
+                            Live Updates
+                        </div>
+                    </div>
+                    <div class="news-carousel">
+                        <div class="news-loading">
+                            <div class="loading-spinner"></div>
+                            <p>Loading latest news...</p>
+                        </div>
+                    </div>
+                    <div class="news-navigation">
+                        <button class="nav-btn prev-btn" onclick="changeNews(-1)">&#8249;</button>
+                        <div class="news-dots"></div>
+                        <button class="nav-btn next-btn" onclick="changeNews(1)">&#8250;</button>
+                    </div>
+                    <div class="news-footer">
+                        <small>Auto-updates every 10 seconds</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="{% static 'admin_panel/js/news.js' %}"></script>
+<script src="{% static 'admin_panel/js/admin_site_pagination.js' %}"></script>
+{% endblock %}

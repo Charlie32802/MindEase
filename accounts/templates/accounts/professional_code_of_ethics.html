@@ -1,0 +1,162 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Professional Code of Ethics — MindEase</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{% static 'accounts/css/legal.css' %}">
+</head>
+<body>
+
+<header class="legal-header">
+    <a href="{% url 'home' %}" class="back-link"><i class="fa-solid fa-arrow-left"></i> Back to Home</a>
+    <h1>Professional Code of Ethics</h1>
+    <p class="effective-date">For MindEase Registered Counselors</p>
+</header>
+
+<main class="legal-container">
+
+    <nav class="toc">
+        <h2>Table of Contents</h2>
+        <ol>
+            <li><a href="#preamble">Preamble</a></li>
+            <li><a href="#general-principles">General Ethical Principles</a></li>
+            <li><a href="#counselee-relationship">Relationship with Counselees</a></li>
+            <li><a href="#privileged-communication">Privileged Communication</a></li>
+            <li><a href="#professional-conduct">Professional Conduct on MindEase</a></li>
+            <li><a href="#referral">Referral & Crisis Protocol</a></li>
+            <li><a href="#colleague-relations">Relationship with Colleagues</a></li>
+            <li><a href="#data-responsibility">Data & Session Responsibility</a></li>
+            <li><a href="#penalties">Administrative Penalties</a></li>
+            <li><a href="#legal-basis">Legal Basis & Citations</a></li>
+        </ol>
+    </nav>
+
+    <section class="legal-section" id="preamble">
+        <h2>Preamble</h2>
+        <p>MindEase is committed to ensuring that all counselors on the platform uphold the highest ethical standards in their professional practice. This Code of Ethics is curated from the <strong>Guidance and Counseling Act of 2004 (Republic Act No. 9258)</strong> and the <strong>Code of Ethics for Registered and Licensed Guidance Counselors (PRC Regulatory Board Resolution No. 05-08)</strong>, focusing specifically on the provisions that are relevant to the services provided through the MindEase platform.</p>
+        <p>As a registered counselor on MindEase, you are expected to comply with both this Code and all applicable provisions of Philippine law governing the practice of guidance and counseling.</p>
+    </section>
+
+    <section class="legal-section" id="general-principles">
+        <h2>1. General Ethical Principles</h2>
+        <p>Derived from Article I of PRC Resolution No. 05-08, counselors on MindEase shall:</p>
+        <ul>
+            <li>Abide by the ethical principles laid down by the Guidance and Counseling Profession (Sec. 1.1)</li>
+            <li>Not misuse the professional relationship for profit, power, prestige, or personal gratification not aligned with the welfare of the counselee (Sec. 1.2)</li>
+            <li>Fully, faithfully, conscientiously, and truthfully devote professional time and effort to the accomplishment and improvement of the guidance and counseling profession (Sec. 1.3)</li>
+            <li>Grow professionally and keep abreast with current trends through continuing professional education and affiliation with recognized guidance associations (Sec. 1.4)</li>
+        </ul>
+    </section>
+
+    <section class="legal-section" id="counselee-relationship">
+        <h2>2. Relationship with Counselees</h2>
+        <p>Derived from Article II of PRC Resolution No. 05-08, counselors shall:</p>
+        <ul>
+            <li><strong>Respect personhood and integrity</strong> — Respect the personhood and integrity of every individual with whom they work (Sec. 2.1)</li>
+            <li><strong>Recognize individual differences</strong> — Acknowledge and accommodate the diverse backgrounds, experiences, and needs of each counselee (Sec. 2.2)</li>
+            <li><strong>Clarify role</strong> — Clearly explain their role and the scope of services they can provide through MindEase (Sec. 2.3)</li>
+            <li><strong>Maintain professional boundaries</strong> — Establish and maintain a professional relationship with the counselee at all times, including during video sessions and in-session chats (Sec. 2.4)</li>
+            <li><strong>Confidentiality</strong> — Share information about the counselee only with persons who can be of help, and only with the approval of the counselee and/or their parent or guardian. Exception: when revelations may result in possible harm to the counselee, someone else, or the community, the counselor must report the facts to appropriate authorities (Sec. 2.6)</li>
+            <li><strong>Referral obligation</strong> — Recommend a referral when it is indicated that the counselee does not benefit from the guidance relationship, while assuming responsibility for the counselee's welfare until the referral is accepted (Sec. 2.7)</li>
+        </ul>
+    </section>
+
+    <section class="legal-section" id="privileged-communication">
+        <h2>3. Privileged Communication</h2>
+        <p>Under <strong>Section 28 of RA 9258</strong>, communications shared in counseling sessions are legally protected:</p>
+        <div class="citation-box">
+            <strong>Sec. 28. Right to Privileged Communication for Guidance Counselors.</strong> — A certified guidance counselor who is allowed to practice guidance and counseling in accordance with this Act cannot, without the consent of the client, be examined as to any communication or information which has been acquired while attending to such client. The protection accorded herein shall also extend to the records and secretary or clerk of a licensed guidance counselor. Any evidence obtained in violation of this provision shall be inadmissible for any purpose in any proceeding.
+        </div>
+        <p>On MindEase, this means:</p>
+        <ul>
+            <li>All video consultations, in-session chat messages, and counselor clinical notes are treated as privileged communications</li>
+            <li>Counselors must not disclose session content to unauthorized third parties</li>
+            <li>Session data stored in the MindEase system (clinical notes, session records) must only be accessed for continuity-of-care purposes</li>
+        </ul>
+    </section>
+
+    <section class="legal-section" id="professional-conduct">
+        <h2>4. Professional Conduct on MindEase</h2>
+        <p>In addition to the statutory obligations, counselors using MindEase specifically agree to:</p>
+        <ul>
+            <li>Provide accurate and truthful professional credentials, license numbers, specializations, and institutional affiliations during registration</li>
+            <li>Maintain valid PRC certification throughout the duration of their account</li>
+            <li>Conduct video sessions professionally, being present and attentive for the full scheduled duration</li>
+            <li>Write comprehensive counselor notes after each completed session to support continuity of care for future sessions</li>
+            <li>Manage availability honestly — only setting slots they intend to attend, and using vacation mode when unavailable</li>
+            <li>Not exploit the booking system, fabricate feedback, or manipulate ratings</li>
+            <li>Respond to user communications within a reasonable timeframe during active sessions</li>
+        </ul>
+    </section>
+
+    <section class="legal-section" id="referral">
+        <h2>5. Referral & Crisis Protocol</h2>
+        <p>MindEase is designed for non-severe mental health support (generalized stress, anxiety, and mild depression). Counselors must:</p>
+        <ul>
+            <li>Recognize when a counselee's condition exceeds the scope of the platform's intended services</li>
+            <li>Follow a mandatory human-led referral protocol for complex or high-risk issues, referring the counselee to appropriate emergency services, psychiatric professionals, or higher-level care facilities</li>
+            <li>Report any immediate danger or risk of self-harm to appropriate authorities, in alignment with the exception described in Sec. 2.6 of the Code of Ethics</li>
+            <li>Not attempt to provide clinical diagnosis, psychiatric treatment, or medication advice through the platform</li>
+        </ul>
+    </section>
+
+    <section class="legal-section" id="colleague-relations">
+        <h2>6. Relationship with Colleagues</h2>
+        <p>Derived from Article IV of PRC Resolution No. 05-08, counselors shall:</p>
+        <ul>
+            <li>Maintain high standards of professional competence and collegial respect within the MindEase community (Sec. 4.1)</li>
+            <li>Keep relationships with fellow counselors on a professional level, refraining from petty personal actions (Sec. 4.2)</li>
+            <li>Give accurate information and avoid any misinterpretation or unclear explanations when communicating with colleagues or the platform's administrative team (Sec. 4.4)</li>
+        </ul>
+    </section>
+
+    <section class="legal-section" id="data-responsibility">
+        <h2>7. Data & Session Responsibility</h2>
+        <p>Counselors have specific responsibilities regarding data handled through the MindEase platform:</p>
+        <ul>
+            <li>Clinical notes written after sessions are stored in the platform's database and may be rendered to future counselors for continuity of care — write notes with this context in mind</li>
+            <li>Do not store, copy, or export patient data (names, session content, clinical notes) outside of the MindEase platform</li>
+            <li>Understand that feedback submitted by users is anonymized and displayed publicly on your counselor profile</li>
+            <li>Uploaded credentials (professional ID, degree certificate) are retained only while the counselor account is active and are accessible only to MindEase administrators during the verification process</li>
+        </ul>
+    </section>
+
+    <section class="legal-section" id="penalties">
+        <h2>8. Administrative Penalties</h2>
+        <p>Violations of this Code of Ethics may result in the following actions by MindEase administration:</p>
+        <ul>
+            <li>Written warning for minor infractions</li>
+            <li>Temporary suspension of counselor privileges and account access</li>
+            <li>Permanent revocation of counselor verification and account deactivation</li>
+        </ul>
+        <p>Additionally, under <strong>Section 24 of RA 9258</strong>, a counselor's Certificate of Registration may be revoked or suspended by the PRC Board for violations of the Code of Ethics, unethical or dishonorable conduct, malpractice, or other causes enumerated in the Act.</p>
+        <div class="citation-box">
+            <strong>Sec. 33. Penalty Clause (RA 9258).</strong> — Any person who violates any provision of this Act and the rules and regulations issued by the Board and the Commission shall be punished with imprisonment of not less than six (6) months but not more than eight (8) years, or a fine of not less than Fifty Thousand Pesos (₱50,000.00) but not more than One Hundred Thousand Pesos (₱100,000.00), or both, in the discretion of the court.
+        </div>
+    </section>
+
+    <section class="legal-section" id="legal-basis">
+        <h2>9. Legal Basis & Citations</h2>
+        <p>This Professional Code of Ethics is curated from the following Philippine laws and regulations:</p>
+        <ul>
+            <li><strong>Republic Act No. 9258</strong> — "Guidance and Counseling Act of 2004," approved March 2, 2004. Enacted by the Senate and House of Representatives of the Philippines in Congress assembled.</li>
+            <li><strong>PRC Regulatory Board of Guidance and Counseling Resolution No. 05-08</strong> — "Code of Ethics for Registered and Licensed Guidance Counselors," dated July 15, 2008. Published in the Official Gazette Vol. 104, No. 39, page 6675, on September 29, 2008.</li>
+        </ul>
+        <p>Only provisions relevant to the services and features of the MindEase platform have been included. For the complete and unabridged text of these laws, please consult the Official Gazette of the Republic of the Philippines.</p>
+    </section>
+
+</main>
+
+<footer class="legal-footer">
+    <p>&copy; 2024 MindEase — Integrated Mental Health Support Platform</p>
+</footer>
+
+<button class="back-to-top" title="Back to top"><i class="fa-solid fa-arrow-up"></i></button>
+
+<script src="{% static 'accounts/js/legal.js' %}"></script>
+</body>
+</html>

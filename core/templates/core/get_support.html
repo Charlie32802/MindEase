@@ -1,0 +1,114 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Contact Us — MindEase</title>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="{% static 'core/css/get_support.css' %}">
+</head>
+
+<body>
+
+  <header class="header">
+    <a href="{% url 'user_dashboard' %}" class="logo-link">
+      <div class="logo">
+        <img src="{% static 'accounts/images/logo.png' %}" alt="Logo">
+        <span>MindEase</span>
+      </div>
+    </a>
+  </header>
+
+  <div class="contact-container">
+
+    <div class="back-row">
+      <a href="{% url 'user_dashboard' %}" class="back-to-dashboard" aria-label="Back to Dashboard">
+        <i class="fa-solid fa-arrow-left"></i>
+        <span>Back to Dashboard</span>
+      </a>
+    </div>
+
+    <div class="page-header">
+      <h1 class="page-title">Contact Us</h1>
+      <p class="page-subtitle">Have questions? We'd love to hear from you</p>
+    </div>
+
+    <div class="contact-grid">
+
+      <!-- Info Card -->
+      <div class="info-card">
+        <h2>Get in Touch</h2>
+        <p>Fill out the form and our team will get back to you within 24 hours.</p>
+        <div class="contact-info">
+          <div class="contact-item">
+            <div class="contact-icon"><i class="fa-solid fa-envelope"></i></div>
+            <span>marcdaryll.trinidad@gmail.com</span>
+          </div>
+          <div class="contact-item">
+            <div class="contact-icon"><i class="fa-solid fa-phone"></i></div>
+            <span>09999502360</span>
+          </div>
+          <div class="contact-item">
+            <div class="contact-icon"><i class="fa-solid fa-location-dot"></i></div>
+            <span>Surigao City, Surigao del Norte, Philippines</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Form Card -->
+      <div class="form-card">
+        <form method="POST" action="">
+          {% csrf_token %}
+          <!-- User Name (Optional) -->
+          <div class="form-group">
+            <label for="name">Name (Optional)</label>
+            <input type="text" id="name" name="name" 
+                   value="{{ user.full_name|default:'' }}" 
+                   class="form-control" />
+          </div>
+          <div class="form-group">
+            <label for="message">Message</label>
+            <textarea id="message" name="message" placeholder="How can we help?" required></textarea>
+          </div>
+          <button type="submit" class="submit-btn">Send Message</button>
+          {% if success %}
+          <p class="success-msg"><i class="fa-solid fa-circle-check"></i> Thank you, {{ name }}! Your message has been sent.</p>
+          {% endif %}
+        </form>
+      </div>
+
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script>
+    window.AI_USER_NAME = "{{ user.full_name|default:user.get_username|escapejs }}";
+  </script>
+
+  {% if messages %}
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      {% for message in messages %}
+        Swal.fire({
+          icon: '{{ message.tags }}' === 'success' ? 'success' : 'error',
+          title: '{{ message.tags }}' === 'success' ? 'Message Sent!' : 'Oops...',
+          text: '{{ message|escapejs }}',
+          confirmButtonColor: '#60a5fa',
+        });
+      {% endfor %}
+    });
+  </script>
+  {% endif %}
+
+  {% if user.is_authenticated %}
+  {% include 'ai_companion/widget.html' %}
+  {% endif %}
+
+</body>
+</html>

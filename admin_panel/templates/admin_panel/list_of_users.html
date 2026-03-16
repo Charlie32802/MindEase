@@ -1,0 +1,147 @@
+{% extends "admin_panel/base.html" %}
+{% load static %}
+
+{% block title %}User List | MindEase Administration{% endblock %}
+
+{% block extrastyle %}
+{{ block.super }}
+<link rel="stylesheet" href="{% static 'admin_panel/css/list_of_users.css' %}">
+<link rel="stylesheet" href="{% static 'admin_panel/css/custom_search.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="admin-dashboard-wrapper {% if sidebar_collapsed %}sidebar-collapsed{% endif %}">
+    {% include "admin_panel/success_message.html" %}
+
+    <div class="page-header">
+        <h1 class="page-title">User List</h1>
+    </div>
+
+    <div class="custom-user-list-container">
+        <!-- Search and Filter Controls -->
+        <div class="filter-controls">
+            <div class="search-container">
+                <div class="input-group">
+                    <div class="custom-search-dropdown" id="searchFieldDropdown">
+                        <div class="search-dropdown-toggle">
+                            <span id="searchFieldText">Select field to search...</span>
+                            <span class="search-dropdown-icon">▼</span>
+                        </div>
+                        <div class="search-dropdown-options">
+                            <div class="search-dropdown-option" data-value="">Select field to search...</div>
+                            <div class="search-dropdown-option" data-value="id">ID</div>
+                            <div class="search-dropdown-option" data-value="full_name">Full Name</div>
+                            <div class="search-dropdown-option" data-value="email">Email</div>
+                            <div class="search-dropdown-option" data-value="role">Role</div>
+                            <div class="search-dropdown-option" data-value="age">Age</div>
+                            <div class="search-dropdown-option" data-value="gender">Gender</div>
+                            <div class="search-dropdown-option" data-value="emergency_contact">Emergency Contact</div>
+                            <div class="search-dropdown-option" data-value="specializations">Specializations</div>
+                            <div class="search-dropdown-option" data-value="other_specializations">Other Specializations
+                            </div>
+                            <div class="search-dropdown-option" data-value="institution">Institution</div>
+                            <div class="search-dropdown-option" data-value="license">License</div>
+                            <div class="search-dropdown-option" data-value="experience">Experience</div>
+                            <div class="search-dropdown-option" data-value="privacy_policy">Privacy Policy</div>
+                            <div class="search-dropdown-option" data-value="status">Status</div>
+                            <div class="search-dropdown-option" data-value="verified">Verified</div>
+                            <div class="search-dropdown-option" data-value="staff">Staff</div>
+                            <div class="search-dropdown-option" data-value="superuser">Superuser</div>
+                        </div>
+                        <input type="hidden" id="searchField" name="searchField" value="">
+                    </div>
+                </div>
+
+                <input type="text" id="searchInput" class="search-input filter-input" placeholder="Enter search term..."
+                    disabled aria-label="Search users">
+
+                <button id="clearSearch" class="clear-search-btn filter-input" disabled aria-label="Clear search"
+                    onclick="clearSearchDropdown()">Clear</button>
+            </div>
+
+            <div class="filter-summary">
+                <span id="filterSummary">Showing all users</span>
+            </div>
+        </div>
+
+        <table class="custom-user-table" aria-label="User List" id="userTable">
+            <thead>
+                <tr>
+                    <th data-field="id">ID</th>
+                    <th data-field="full_name">Full Name</th>
+                    <th data-field="email">Email</th>
+                    <th data-field="role">Role</th>
+                    <th data-field="age">Age</th>
+                    <th data-field="gender">Gender</th>
+                    <th data-field="emergency_contact">Emergency Contact</th>
+                    <th data-field="specializations">Specializations</th>
+                    <th data-field="other_specializations">Other Specializations</th>
+                    <th data-field="institution">Institution</th>
+                    <th data-field="license">License</th>
+                    <th data-field="experience">Experience</th>
+                    <th data-field="privacy_policy">Privacy Policy</th>
+                    <th data-field="status">Status</th>
+                    <th data-field="verified">Verified</th>
+                    <th data-field="staff">Staff</th>
+                    <th data-field="superuser">Superuser</th>
+                    <th data-field="created_at">Created At</th>
+                </tr>
+            </thead>
+            <tbody id="userTableBody">
+                {% for user in users %}
+                <tr data-user-id="{{ user.id }}">
+                    <td data-field="id">{{ user.id }}</td>
+                    <td data-field="full_name">{{ user.full_name }}</td>
+                    <td data-field="email">{{ user.email }}</td>
+                    <td data-field="role">{{ user.get_role_display }}</td>
+                    <td data-field="age">{{ user.age|default:"N/A" }}</td>
+                    <td data-field="gender">{{ user.get_gender_display_admin|default:"N/A" }}</td>
+                    <td data-field="emergency_contact">{{ user.get_emergency_contact_display|default:"N/A" }}</td>
+                    <td data-field="specializations">{{ user.get_specializations_display }}</td>
+                    <td data-field="other_specializations">{{ user.other_specializations|default:"N/A" }}</td>
+                    <td data-field="institution">{{ user.get_institution_display }}</td>
+                    <td data-field="license">{{ user.get_license_display }}</td>
+                    <td data-field="experience">{{ user.get_experience_display }}</td>
+                    <td data-field="privacy_policy">{{ user.accepted_privacy_policy|yesno:"Yes,No" }}</td>
+                    <td data-field="status">{{ user.is_active|yesno:"Active,Inactive" }}</td>
+                    <td data-field="verified">
+                        {% if user.role == 'counselor' %}
+                        {% if not user.is_verified and not user.is_active %}
+                        Rejected
+                        {% elif user.is_verified %}
+                        Verified
+                        {% else %}
+                        Pending Review
+                        {% endif %}
+                        {% else %}
+                        N/A
+                        {% endif %}
+                    </td>
+                    <td data-field="staff">{{ user.is_staff|yesno:"Yes,No" }}</td>
+                    <td data-field="superuser">{{ user.is_superuser|yesno:"Yes,No" }}</td>
+                    <td data-field="created_at">{{ user.created_at|date:"F j, Y, g:i A" }}</td>
+                </tr>
+                {% empty %}
+                <tr id="noUsersRow">
+                    <td colspan="18">No users found.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <div id="noResultsMessage" class="no-results" style="display: none;">
+            <div class="no-results-content">
+                <div class="no-results-icon"><i class="fas fa-search"></i></div>
+                <h3>No results found</h3>
+                <p>No users match your search criteria. Try adjusting your search terms.</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block footer %}
+{{ block.super }}
+<script src="{% static 'admin_panel/js/custom_search.js' %}"></script>
+<script src="{% static 'admin_panel/js/list_of_users.js' %}"></script>
+{% endblock %}

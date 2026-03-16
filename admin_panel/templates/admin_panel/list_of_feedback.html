@@ -1,0 +1,108 @@
+{% extends "admin_panel/base.html" %}
+{% load static %}
+
+{% block title %}Feedback | MindEase Administration{% endblock %}
+
+{% block extrastyle %}
+{{ block.super }}
+<link rel="stylesheet" href="{% static 'admin_panel/css/list_of_users.css' %}">
+<link rel="stylesheet" href="{% static 'admin_panel/css/custom_search.css' %}">
+<link rel="stylesheet" href="{% static 'admin_panel/css/list_of_feedback.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="admin-dashboard-wrapper {% if sidebar_collapsed %}sidebar-collapsed{% endif %}">
+    {% include "admin_panel/success_message.html" %}
+
+    <div class="page-header">
+        <h1 class="page-title">Feedback</h1>
+    </div>
+
+    <div class="custom-user-list-container">
+        <!-- Search and Filter Controls -->
+        <div class="filter-controls">
+            <div class="search-container">
+                <div class="input-group">
+                    <div class="custom-search-dropdown" id="searchFieldDropdown">
+                        <div class="search-dropdown-toggle">
+                            <span id="searchFieldText">Select field to search...</span>
+                            <span class="search-dropdown-icon">▼</span>
+                        </div>
+                        <div class="search-dropdown-options">
+                            <div class="search-dropdown-option" data-value="">Select field to search...</div>
+                            <div class="search-dropdown-option" data-value="id">ID</div>
+                            <div class="search-dropdown-option" data-value="counselor">Counselor</div>
+                            <div class="search-dropdown-option" data-value="patient">Patient</div>
+                            <div class="search-dropdown-option" data-value="rating">Rating</div>
+                            <div class="search-dropdown-option" data-value="message">Message</div>
+                            <div class="search-dropdown-option" data-value="date">Date</div>
+                        </div>
+                        <input type="hidden" id="searchField" name="searchField" value="">
+                    </div>
+                </div>
+
+                <input type="text" id="searchInput" class="search-input filter-input" placeholder="Enter search term..."
+                    disabled aria-label="Search feedback">
+
+                <button id="clearSearch" class="clear-search-btn filter-input" disabled aria-label="Clear search"
+                    onclick="clearSearchDropdown()">Clear</button>
+            </div>
+
+            <div class="filter-summary">
+                <span id="filterSummary">Showing all feedback</span>
+            </div>
+        </div>
+
+        <table class="custom-user-table" aria-label="Feedback List" id="userTable">
+            <thead>
+                <tr>
+                    <th data-field="id">ID</th>
+                    <th data-field="counselor">Counselor</th>
+                    <th data-field="patient">Patient</th>
+                    <th data-field="rating">Rating</th>
+                    <th data-field="message">Message</th>
+                    <th data-field="date">Date</th>
+                </tr>
+            </thead>
+            <tbody id="userTableBody">
+                {% for fb in feedbacks %}
+                <tr>
+                    <td data-field="id">{{ fb.id }}</td>
+                    <td data-field="counselor">{{ fb.counselor.full_name }}</td>
+                    <td data-field="patient">User #{{ fb.patient.id }}</td>
+                    <td data-field="rating">
+                        {% if fb.rating %}
+                            <span class="rating-badge">{{ fb.rating }} <i class="fas fa-star"></i></span>
+                        {% else %}
+                            <span class="no-rating-badge">No rating</span>
+                        {% endif %}
+                    </td>
+                    <td data-field="message">
+                        <span class="feedback-msg" title="{{ fb.message }}">{{ fb.message|truncatewords:15 }}</span>
+                    </td>
+                    <td data-field="date">{{ fb.created_at|date:"F j, Y, g:i A" }}</td>
+                </tr>
+                {% empty %}
+                <tr id="noUsersRow">
+                    <td colspan="6">No feedback found.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <div id="noResultsMessage" class="no-results" style="display: none;">
+            <div class="no-results-content">
+                <div class="no-results-icon"><i class="fas fa-search"></i></div>
+                <h3>No results found</h3>
+                <p>No feedback matches your search criteria. Try adjusting your search terms.</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block footer %}
+{{ block.super }}
+<script src="{% static 'admin_panel/js/custom_search.js' %}"></script>
+<script src="{% static 'admin_panel/js/list_of_feedback.js' %}"></script>
+{% endblock %}

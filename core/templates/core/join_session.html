@@ -1,0 +1,410 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+  <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Session with {{ appointment.counselor.full_name }}</title>
+    <link rel="stylesheet" href="{% static 'core/css/join_session.css' %}">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://download.agora.io/sdk/release/AgoraRTC_N-4.22.1.js"></script>
+</head>
+<body>
+
+<div class="main-content">
+    <div class="session-header">
+        {% if user_role == 'user' %}
+        <h1>Session with {{ appointment.counselor.full_name }}</h1>
+        {% else %}
+        <h1>Session with {{ appointment.patient.full_name }}</h1>
+        {% endif %}
+        <p>Date: {{ appointment.date|date:"l, F j" }} &nbsp;|&nbsp; <span id="liveClock"></span></p>
+    </div>
+
+    <div class="video-container" id="video-container">
+        <div id="remote-video"></div>
+        <div id="local-video">
+            <div class="no-cam-label" id="no-cam-msg" style="display:none;">Camera unavailable</div>
+        </div>
+
+        <div class="session-timer" id="sessionTimer" style="display:none;">
+            <span class="timer-dot"></span>
+            <span id="timerDisplay">00:00</span>
+        </div>
+
+        <div class="emoji-bar" id="emojiBar" style="display:none;">
+            <button class="emoji-btn" data-emoji="👍" onclick="sendReaction('👍')">👍</button>
+            <button class="emoji-btn" data-emoji="👎" onclick="sendReaction('👎')">👎</button>
+            <button class="emoji-btn" data-emoji="❤️" onclick="sendReaction('❤️')">❤️</button>
+            <button class="emoji-btn" data-emoji="😊" onclick="sendReaction('😊')">😊</button>
+            <button class="emoji-btn" data-emoji="😢" onclick="sendReaction('😢')">😢</button>
+            <button class="emoji-btn" data-emoji="😂" onclick="sendReaction('😂')">😂</button>
+            <button class="emoji-btn" data-emoji="😠" onclick="sendReaction('😠')">😠</button>
+            <button class="emoji-btn" data-emoji="👏" onclick="sendReaction('👏')">👏</button>
+            <button class="emoji-btn" data-emoji="🎉" onclick="sendReaction('🎉')">🎉</button>
+        </div>
+
+        <div class="video-controls" id="video-controls" style="display:none;">
+            <button class="ctrl-btn" id="micBtn" onclick="toggleMic()" title="Mute / Unmute">
+                <svg id="micIcon" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+                    <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+                    <line x1="12" y1="19" x2="12" y2="23"/>
+                    <line x1="8" y1="23" x2="16" y2="23"/>
+                </svg>
+                <svg id="micMutedIcon" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none;">
+                    <line x1="1" y1="1" x2="23" y2="23"/>
+                    <path d="M9 9v3a3 3 0 0 0 5.12 2.12M15 9.34V4a3 3 0 0 0-5.94-.6"/>
+                    <path d="M17 16.95A7 7 0 0 1 5 12v-2m14 0v2a7 7 0 0 1-.11 1.23"/>
+                    <line x1="12" y1="19" x2="12" y2="23"/>
+                    <line x1="8" y1="23" x2="16" y2="23"/>
+                </svg>
+            </button>
+
+            <button class="ctrl-btn" id="camBtn" onclick="toggleCam()" title="Camera On / Off">
+                <svg id="camIcon" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polygon points="23 7 16 12 23 17 23 7"/>
+                    <rect x="1" y="5" width="15" height="14" rx="2" ry="2"/>
+                </svg>
+                <svg id="camOffIcon" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none;">
+                    <line x1="1" y1="1" x2="23" y2="23"/>
+                    <path d="M21 21H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h3m3-3h6l2 3h4a2 2 0 0 1 2 2v9.34"/>
+                    <path d="M16 11.37A4 4 0 1 1 12.63 8"/>
+                </svg>
+            </button>
+
+            <button class="ctrl-btn danger" onclick="leaveSession()" title="Leave Session">
+                <svg viewBox="0 0 24 24" fill="white" stroke="none">
+                    <path d="M6.6 10.8c1.4 2.8 3.8 5.1 6.6 6.6l2.2-2.2c.3-.3.7-.4 1-.2
+                             1.1.4 2.3.6 3.6.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1
+                             C10.6 21 3 13.4 3 4c0-.6.4-1 1-1h3.5c.6 0 1 .4 1 1
+                             0 1.3.2 2.5.6 3.6.1.3 0 .7-.2 1L6.6 10.8z"/>
+                    <line x1="3" y1="3" x2="21" y2="21" stroke="white" stroke-width="2.2" stroke-linecap="round"/>
+                </svg>
+            </button>
+        </div>
+    </div>
+
+    <button class="chat-widget-btn" onclick="toggleChat()" title="Open Chat">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+        </svg>
+        <span class="unread-badge" id="unreadBadge"></span>
+    </button>
+
+    <div class="chat-container" id="chatContainer">
+        <div class="chat-header">
+            <span>Session Chat</span>
+            <div>
+                <button class="icon-btn" onclick="toggleFullscreenChat()" title="Fullscreen">⛶</button>
+                <button class="icon-btn" onclick="toggleChat()" title="Close">✖</button>
+            </div>
+        </div>
+        <div id="chatMessages"></div>
+        <div class="chat-input-area">
+            <input type="text" id="chatInput" placeholder="Type a message…" />
+            <button onclick="sendChat()">Send</button>
+        </div>
+    </div>
+</div>
+
+{% if user_role == 'counselor' %}
+<div class="notes-sidebar">
+    <h3>Patient Record</h3>
+    <p>Past {{ patient.full_name }} Sessions</p>
+    {% if past_notes %}
+        {% for note_session in past_notes %}
+        <div class="note-card">
+            <div class="note-date">{{ note_session.date|date:"M d, Y" }} at {{ note_session.time|time:"g:i A" }}</div>
+            <div class="note-text">
+                {% if note_session.counselor_notes %}
+                    {{ note_session.counselor_notes }}
+                {% else %}
+                    <span class="no-notes">No notes for this session.</span>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+    {% else %}
+        <p class="no-notes">No past sessions recorded for this patient yet.</p>
+    {% endif %}
+</div>
+{% endif %}
+
+<script>
+    const AGORA_APP_ID  = "{{ agora_app_id|escapejs }}";
+    const AGORA_CHANNEL = "{{ agora_channel|escapejs }}";
+    const appointmentId = "{{ appointment.id }}";
+    const userName      = "{{ user.full_name|escapejs }}";
+
+    let isChatOpen   = false;
+    let unreadCount  = 0;
+    let micTrack     = null;
+    let cameraTrack  = null;
+    let micMuted     = false;
+    let camOff       = false;
+
+    const agoraClient = AgoraRTC.createClient({ mode: "rtc", codec: "vp8" });
+
+    AgoraRTC.onAutoplayFailed = () => {
+        const btn = document.createElement('button');
+        btn.textContent = 'Click to enable audio';
+        btn.style.cssText = 'position:fixed;top:12px;left:50%;transform:translateX(-50%);z-index:9999;padding:10px 20px;background:#60a5fa;color:white;border:none;border-radius:100px;cursor:pointer;font-size:14px;font-family:inherit;';
+        btn.onclick = () => { AgoraRTC.resumeAudioContext(); btn.remove(); };
+        document.body.appendChild(btn);
+    };
+
+    async function startAgoraCall() {
+        try {
+            await agoraClient.join(AGORA_APP_ID, AGORA_CHANNEL, null, null);
+            try {
+                [micTrack, cameraTrack] = await AgoraRTC.createMicrophoneAndCameraTracks();
+                cameraTrack.play("local-video");
+                await agoraClient.publish([micTrack, cameraTrack]);
+            } catch (mediaErr) {
+                document.getElementById('no-cam-msg').style.display = 'block';
+                const camBtn = document.getElementById('camBtn');
+                camBtn.disabled = true;
+                camBtn.style.opacity = '0.35';
+                try {
+                    micTrack = await AgoraRTC.createMicrophoneAudioTrack();
+                    await agoraClient.publish([micTrack]);
+                } catch (audioErr) {
+                    console.warn('Audio also unavailable:', audioErr);
+                }
+            }
+            document.getElementById('video-controls').style.display = 'flex';
+            startSessionTimer();
+            document.getElementById('emojiBar').style.display = 'flex';
+        } catch (err) {
+            Swal.fire({ title: 'Connection Error', text: 'Could not connect: ' + err.message, icon: 'error' });
+        }
+    }
+
+    agoraClient.on("user-published", async (user, mediaType) => {
+        await agoraClient.subscribe(user, mediaType);
+        if (mediaType === "video") user.videoTrack.play("remote-video");
+        if (mediaType === "audio") user.audioTrack.play();
+    });
+
+    agoraClient.on("user-left", () => {
+        {% if user_role == 'counselor' %}
+        Swal.fire({
+            title: 'Patient Left',
+            text: 'The patient has left the session. You may remain here to complete your notes, or click "Leave Session" when you are finished.',
+            icon: 'info'
+        });
+        {% else %}
+        Swal.fire({
+            title: 'Counselor Left',
+            text: 'Your counselor has left the video call. You will be notified when the session formally ends.',
+            icon: 'info'
+        });
+        {% endif %}
+    });
+
+    async function toggleMic() {
+        if (!micTrack) return;
+        micMuted = !micMuted;
+        await micTrack.setMuted(micMuted);
+        document.getElementById('micBtn').classList.toggle('muted', micMuted);
+        document.getElementById('micIcon').style.display      = micMuted ? 'none'  : 'block';
+        document.getElementById('micMutedIcon').style.display = micMuted ? 'block' : 'none';
+    }
+
+    async function toggleCam() {
+        if (!cameraTrack) return;
+        camOff = !camOff;
+        await cameraTrack.setMuted(camOff);
+        document.getElementById('camBtn').classList.toggle('muted', camOff);
+        document.getElementById('camIcon').style.display    = camOff ? 'none'  : 'block';
+        document.getElementById('camOffIcon').style.display = camOff ? 'block' : 'none';
+    }
+
+    async function leaveSession() {
+        const result = await Swal.fire({
+            title: 'Leave Session?',
+            text: 'Are you sure you want to leave?',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Yes, leave',
+            cancelButtonText: 'Stay'
+        });
+        if (result.isConfirmed) {
+            stopSessionTimer();
+            if (micTrack)    micTrack.close();
+            if (cameraTrack) cameraTrack.close();
+            await agoraClient.leave();
+            localStorage.setItem('left_session_{{ appointment.id }}', 'true');
+            Swal.fire({ title: 'You have left the session.', icon: 'info', confirmButtonText: 'Go to Dashboard' }).then(() => {
+                {% if user_role == 'counselor' %}
+                window.location.href = "{% url 'counselor_dashboard' %}";
+                {% else %}
+                window.location.href = "{% url 'user_dashboard' %}";
+                {% endif %}
+            });
+        }
+    }
+
+    if (AGORA_CHANNEL) {
+        Swal.fire({ title: 'Joining Session…', text: 'Connecting you now…', icon: 'info', timer: 2000, showConfirmButton: false }).then(() => startAgoraCall());
+    } else {
+        document.getElementById('video-container').innerHTML = `
+            <div class="waiting-message">
+                <h2>⏳ Waiting for counselor to start the session…</h2>
+                <p>This page will automatically refresh every 15 seconds.</p>
+            </div>`;
+        setTimeout(() => location.reload(), 15000);
+    }
+
+    function toggleChat() {
+        const el = document.getElementById('chatContainer');
+        isChatOpen = !isChatOpen;
+        el.style.display = isChatOpen ? 'flex' : 'none';
+        if (isChatOpen) {
+            unreadCount = 0;
+            updateUnreadBadge();
+            document.getElementById('chatMessages').scrollTop = document.getElementById('chatMessages').scrollHeight;
+        }
+    }
+
+    function toggleFullscreenChat() {
+        document.getElementById('chatContainer').classList.toggle('fullscreen');
+    }
+
+    function updateUnreadBadge() {
+        const badge = document.getElementById('unreadBadge');
+        badge.style.display = unreadCount > 0 ? 'flex' : 'none';
+        badge.textContent   = unreadCount > 0 ? unreadCount : '';
+    }
+
+    const wsProtocol = window.location.protocol === 'https:' ? 'wss://' : 'ws://';
+    const chatSocket = new WebSocket(`${wsProtocol}${window.location.host}/ws/session/${appointmentId}/`);
+
+    chatSocket.onmessage = function(e) {
+        const data = JSON.parse(e.data);
+
+        if (data.type === 'session_ended') {
+            {% if user_role == 'user' %}
+            stopSessionTimer();
+            if (micTrack)    micTrack.close();
+            if (cameraTrack) cameraTrack.close();
+            agoraClient.leave().catch(err => console.log('Leave err:', err));
+            localStorage.setItem('left_session_{{ appointment.id }}', 'true');
+            Swal.fire({
+                title: 'Session Ended',
+                text: 'Your counselor has ended the session.',
+                icon: 'info',
+                confirmButtonText: 'Okay'
+            }).then(() => {
+                window.location.href = "{% url 'user_dashboard' %}";
+            });
+            {% endif %}
+            return;
+        }
+
+        if (data.type === 'reaction') {
+            if (data.sender === userName) return;
+            const container = document.getElementById('video-container');
+            const x = container.offsetWidth  / 2 + (Math.random() - 0.5) * 120;
+            const y = container.offsetHeight - 100;
+            spawnFirefly(data.emoji, x, y);
+            return;
+        }
+
+        const msgs   = document.getElementById('chatMessages');
+        const isSelf = data.sender === userName;
+        const msgEl  = document.createElement('div');
+        msgEl.className = `chat-message ${isSelf ? 'self' : 'other'}`;
+        const senderEl = document.createElement('div');
+        senderEl.className   = 'message-sender';
+        senderEl.textContent = isSelf ? 'You' : data.sender;
+        const textEl = document.createElement('div');
+        textEl.textContent = data.message;
+        msgEl.appendChild(senderEl);
+        msgEl.appendChild(textEl);
+        msgs.appendChild(msgEl);
+        if (!isChatOpen && !isSelf) { unreadCount++; updateUnreadBadge(); }
+        msgs.scrollTop = msgs.scrollHeight;
+    };
+
+    function sendChat() {
+        const input   = document.getElementById('chatInput');
+        const message = input.value.trim();
+        if (!message) return;
+        chatSocket.send(JSON.stringify({ message, sender: userName }));
+        input.value = '';
+    }
+
+    document.getElementById('chatInput').addEventListener('keypress', e => {
+        if (e.key === 'Enter') sendChat();
+    });
+
+    function updateClock() {
+        const now  = new Date();
+        let h      = now.getHours();
+        const m    = String(now.getMinutes()).padStart(2, '0');
+        const s    = String(now.getSeconds()).padStart(2, '0');
+        const ampm = h >= 12 ? 'PM' : 'AM';
+        h = h % 12 || 12;
+        document.getElementById('liveClock').textContent = `${h}:${m}:${s} ${ampm}`;
+    }
+    updateClock();
+    setInterval(updateClock, 1000);
+
+    let sessionSeconds       = 0;
+    let sessionTimerInterval = null;
+
+    function startSessionTimer() {
+        document.getElementById('sessionTimer').style.display = 'flex';
+        sessionTimerInterval = setInterval(() => {
+            sessionSeconds++;
+            const m = String(Math.floor(sessionSeconds / 60)).padStart(2, '0');
+            const s = String(sessionSeconds % 60).padStart(2, '0');
+            document.getElementById('timerDisplay').textContent = `${m}:${s}`;
+        }, 1000);
+    }
+
+    function stopSessionTimer() {
+        if (sessionTimerInterval) { clearInterval(sessionTimerInterval); sessionTimerInterval = null; }
+    }
+
+    const activeFireflies = {};
+
+    function sendReaction(emoji) {
+        chatSocket.send(JSON.stringify({ type: 'reaction', emoji, sender: userName }));
+        const btn       = document.querySelector(`.emoji-btn[data-emoji="${emoji}"]`);
+        const container = document.getElementById('video-container');
+        if (!btn || !container) return;
+        const cRect = container.getBoundingClientRect();
+        const bRect = btn.getBoundingClientRect();
+        const x = bRect.left - cRect.left + bRect.width  / 2 + (Math.random() - 0.5) * 8;
+        const y = bRect.top  - cRect.top  + bRect.height / 2;
+        spawnFirefly(emoji, x, y);
+    }
+
+    function spawnFirefly(emoji, x, y) {
+        if (!activeFireflies[emoji]) activeFireflies[emoji] = 0;
+        if (activeFireflies[emoji] >= 6) return;
+        activeFireflies[emoji]++;
+        const container = document.getElementById('video-container');
+        const wrapper   = document.createElement('div');
+        wrapper.className  = 'firefly';
+        wrapper.style.left = x + 'px';
+        wrapper.style.top  = y + 'px';
+        const dot = document.createElement('div');
+        dot.className = 'ff-dot';
+        const em = document.createElement('div');
+        em.className   = 'ff-emoji';
+        em.textContent = emoji;
+        wrapper.appendChild(dot);
+        wrapper.appendChild(em);
+        container.appendChild(wrapper);
+        setTimeout(() => { wrapper.remove(); activeFireflies[emoji]--; }, 2400);
+    }
+</script>
+</body>
+</html>

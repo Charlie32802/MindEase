@@ -1,0 +1,368 @@
+<!-- admin_custom_sidebar.html -->
+{% load static %}
+
+<nav class="admin-custom-sidebar">
+    <!-- Toggle Button -->
+    <button class="sidebar-toggle" onclick="toggleSidebar()">
+        <span class="toggle-icon">&#x276E;</span>
+    </button>
+
+    <!-- Navigation Menu -->
+    <div class="sidebar-nav">
+        <!-- Dashboard -->
+        <a href="{% url 'custom_admin:index' %}"
+            class="nav-item {% if request.resolver_match.url_name == 'index' %}active{% endif %}">
+            <span class="nav-icon"><i class="fas fa-tachometer-alt"></i></span>
+            <span class="nav-text">Dashboard</span>
+        </a>
+
+        <!-- All Users -->
+        <a href="{% url 'custom_admin:user_list' %}"
+            class="nav-item {% if request.resolver_match.url_name == 'user_list' %}active{% endif %}">
+            <span class="nav-icon"><i class="fas fa-users"></i></span>
+            <span class="nav-text">All Users</span>
+            <span class="nav-badge">{{ total_users_count|default:0 }}</span>
+        </a>
+
+        <!-- Add User -->
+        <a href="{% url 'custom_admin:accounts_user_add' %}"
+            class="nav-item {% if 'accounts_user_add' in request.resolver_match.url_name %}active{% endif %}">
+            <span class="nav-icon"><i class="fas fa-user-plus"></i></span>
+            <span class="nav-text">Add User</span>
+        </a>
+
+        <!-- All Counselors -->
+        <a href="{% url 'custom_admin:counselor_list' %}"
+            class="nav-item {% if request.resolver_match.url_name == 'counselor_list' %}active{% endif %}">
+            <span class="nav-icon"><i class="fas fa-user-md"></i></span>
+            <span class="nav-text">All Counselors</span>
+            <span class="nav-badge">{{ total_counselors_count|default:0 }}</span>
+        </a>
+
+        <!-- Pending Approval -->
+        <a href="{% url 'custom_admin:pending_approval' %}" class="nav-item">
+            <span class="nav-icon"><i class="fas fa-hourglass-half"></i></span>
+            <span class="nav-text">Pending Approval</span>
+            <span class="nav-badge pending">{{ pending_approval_count|default:0 }}</span>
+        </a>
+
+        <!-- Wellness Tips -->
+        <a href="{% url 'custom_admin:wellness_tips_list' %}"
+            class="nav-item {% if request.resolver_match.url_name == 'wellness_tips_list' %}active{% endif %}">
+            <span class="nav-icon"><i class="fas fa-lightbulb"></i></span>
+            <span class="nav-text">Wellness Tips</span>
+        </a>
+
+        <!-- Feedback -->
+        <a href="{% url 'custom_admin:feedback_list' %}"
+            class="nav-item {% if request.resolver_match.url_name == 'feedback_list' %}active{% endif %}">
+            <span class="nav-icon"><i class="fas fa-comment-dots"></i></span>
+            <span class="nav-text">Feedback</span>
+            <span class="nav-badge">{{ total_feedback_count|default:0 }}</span>
+        </a>
+    </div>
+
+    <!-- Sidebar Footer -->
+    <div class="sidebar-footer">
+        <div class="user-info">
+            <div class="user-avatar">
+                {{ user.get_username|slice:":1"|upper }}
+            </div>
+            <div class="user-details">
+                <div class="user-name">{{ user.get_full_name|default:user.get_username }}</div>
+                <div class="user-role">Administrator</div>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<style>
+    .admin-dashboard-wrapper {
+        display: flex;
+        min-height: calc(100vh - 80px - 60px);
+        position: relative;
+    }
+
+    /* Sidebar container - fixed position on left, below navbar */
+    .admin-custom-sidebar {
+        width: 260px;
+        height: calc(100vh - 120px);
+        background: linear-gradient(180deg, #1e3a8a 0%, #1e40af 100%);
+        color: white;
+        position: fixed;
+        left: 0;
+        top: auto;
+        display: flex;
+        flex-direction: column;
+        box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        transition: transform 0.3s ease;
+        z-index: 999;
+    }
+
+    /* Main content adjustment - properly moves content when sidebar opens */
+    .admin-dashboard-content {
+        margin-left: 260px;
+        transition: margin-left 0.3s ease;
+        width: calc(100% - 260px);
+        min-height: calc(100vh - 120px);
+    }
+
+    .admin-dashboard-content.sidebar-collapsed {
+        margin-left: 0;
+        width: 100%;
+    }
+
+    /* Toggle button */
+    .sidebar-toggle {
+        position: absolute;
+        top: calc(50% - 40px);
+        right: -25px;
+        transform: translateY(-50%);
+        width: 25px;
+        height: 50px;
+        background: #1e40af;
+        border: none;
+        color: white;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 1001;
+        border-radius: 0 8px 8px 0;
+        transition: all 0.3s ease;
+        box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+    }
+
+    .sidebar-toggle:hover {
+        background: #1e3a8a;
+        right: -28px;
+        width: 28px;
+    }
+
+    .toggle-icon {
+        font-size: 14px;
+        transition: transform 0.3s ease;
+    }
+
+    .admin-custom-sidebar.collapsed {
+        transform: translateX(-260px);
+    }
+
+    .admin-custom-sidebar.collapsed .toggle-icon {
+        transform: rotate(180deg);
+    }
+
+    /* Navigation */
+    .sidebar-nav {
+        flex: 1;
+        padding: 20px 0;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-start;
+        gap: 8px;
+    }
+
+    .nav-item {
+        display: flex;
+        align-items: center;
+        padding: 16px 24px;
+        color: rgba(255, 255, 255, 0.9);
+        text-decoration: none;
+        transition: all 0.2s ease;
+        position: relative;
+        gap: 12px;
+        font-size: 15px;
+        line-height: 1.4;
+        margin: 0 12px;
+        border-radius: 8px;
+    }
+
+    .nav-item:hover {
+        background: rgba(255, 255, 255, 0.1);
+        color: white;
+        transform: translateX(4px);
+    }
+
+    .nav-item.active {
+        background: rgba(255, 255, 255, 0.15);
+        color: white;
+        border-left: 4px solid #60a5fa;
+        border-radius: 0 8px 8px 0;
+        margin-left: 12px;
+    }
+
+    .nav-icon {
+        font-size: 18px;
+        min-width: 24px;
+        text-align: center;
+    }
+
+    .nav-text {
+        flex: 1;
+        font-weight: 500;
+    }
+
+    .nav-badge {
+        background: rgba(255, 255, 255, 0.2);
+        color: white;
+        padding: 4px 10px;
+        border-radius: 12px;
+        font-size: 12px;
+        font-weight: 600;
+        min-width: 24px;
+        text-align: center;
+    }
+
+    .nav-badge.pending {
+        background: #f59e0b;
+        animation: pulse 2s infinite;
+    }
+
+    /* Sidebar footer */
+    .sidebar-footer {
+        padding: 20px;
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+        background: rgba(0, 0, 0, 0.1);
+        margin-top: auto;
+    }
+
+    .user-info {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        overflow: visible;
+    }
+
+    .user-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 600;
+        font-size: 16px;
+        flex-shrink: 0;
+    }
+
+    .user-details {
+        flex: 1;
+        min-width: 0;
+        overflow: visible;
+    }
+
+    .user-name {
+        font-weight: 600;
+        font-size: 13px;
+        word-break: break-all;
+        line-height: 1.3;
+        display: block;
+    }
+
+    .user-role {
+        font-size: 12px;
+        opacity: 0.7;
+    }
+
+    /* Animations */
+    @keyframes pulse {
+
+        0%,
+        100% {
+            opacity: 1;
+        }
+
+        50% {
+            opacity: 0.7;
+        }
+    }
+
+    /* Responsive design */
+    @media (max-width: 768px) {
+        .admin-custom-sidebar {
+            width: 240px;
+            height: calc(100vh - 120px);
+            top: 80px;
+        }
+
+        .admin-dashboard-content {
+            margin-left: 240px;
+            width: calc(100% - 240px);
+        }
+
+        .admin-custom-sidebar.collapsed {
+            transform: translateX(-240px);
+        }
+
+        .admin-dashboard-content.sidebar-collapsed {
+            margin-left: 0;
+            width: 100%;
+        }
+
+        .sidebar-toggle {
+            right: -30px;
+            width: 30px;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .admin-custom-sidebar {
+            width: 100%;
+            height: calc(100vh - 120px);
+            top: 80px;
+            transform: translateX(-100%);
+        }
+
+        .admin-dashboard-content {
+            margin-left: 0;
+            width: 100%;
+        }
+
+        .admin-custom-sidebar.collapsed {
+            transform: translateX(-100%);
+        }
+
+        .admin-dashboard-content.sidebar-collapsed {
+            margin-left: 0;
+            width: 100%;
+        }
+    }
+</style>
+
+<script>
+    function toggleSidebar() {
+        const sidebar = document.querySelector('.admin-custom-sidebar');
+        // Find all possible content wrappers
+        const wrappers = document.querySelectorAll('.admin-dashboard-content, .admin-dashboard-wrapper, .custom-admin-add-user');
+
+        sidebar.classList.toggle('collapsed');
+        const isCollapsed = sidebar.classList.contains('collapsed');
+
+        wrappers.forEach(wrapper => {
+            if (isCollapsed) {
+                wrapper.classList.add('sidebar-collapsed');
+            } else {
+                wrapper.classList.remove('sidebar-collapsed');
+            }
+        });
+
+        // Save state to localStorage
+        localStorage.setItem('sidebarCollapsed', isCollapsed);
+    }
+
+    // Load saved state on page load
+    document.addEventListener('DOMContentLoaded', function () {
+        const savedState = localStorage.getItem('sidebarCollapsed');
+        const sidebar = document.querySelector('.admin-custom-sidebar');
+        const wrappers = document.querySelectorAll('.admin-dashboard-content, .admin-dashboard-wrapper, .custom-admin-add-user');
+
+        if (savedState === 'true' && sidebar) {
+            sidebar.classList.add('collapsed');
+            wrappers.forEach(wrapper => {
+                wrapper.classList.add('sidebar-collapsed');
+            });
+        }
+    });
+</script>

@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+  <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MindEase - Login / Register</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'accounts/css/form.css' %}">
+</head>
+
+<body>
+    <div class="bg-animation">
+        <div class="floating-shape shape-1"></div>
+        <div class="floating-shape shape-2"></div>
+        <div class="floating-shape shape-3"></div>
+        <div class="floating-shape shape-4"></div>
+    </div>
+
+    <a href="{% url 'home' %}" class="back-btn">
+        <span><i class="fa-solid fa-arrow-left"></i></span> Back to Home
+    </a>
+    <!-- Preview Modal -->
+    <div class="preview-modal" id="previewModal">
+        <div class="preview-content">
+            <div class="preview-tools">
+                <button class="preview-tool-btn" onclick="closePreview()"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="preview-img-container">
+                <img src="" alt="File Preview" class="preview-img" id="previewImage">
+            </div>
+            <div class="zoom-controls">
+                <button class="zoom-btn" onclick="zoomOut(event)">−</button>
+                <button class="zoom-btn" onclick="resetZoom(event)">↺</button>
+                <button class="zoom-btn" onclick="zoomIn(event)">+</button>
+            </div>
+        </div>
+    </div>
+    <div class="form-wrapper">
+        <div class="form-container">
+            {% if messages %}
+            <div class="messages" style="margin-bottom: 20px;">
+                {% for message in messages %}
+                <div class="alert alert-{{ message.tags }}">
+                    {{ message }}
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+            <div class="form-header">
+                <img src="{% static 'accounts/images/logo.png' %}" alt="Logo" class="logo-image"
+                    style="width: 120px; height: 120px;">
+                {% if request.GET.action == "register" %}
+                <h2 class="form-title">Join MindEase</h2>
+                <p class="form-subtitle">Create your account and start your mental health journey</p>
+                {% else %}
+                <h2 class="form-title">Welcome Back</h2>
+                <p class="form-subtitle">Sign in to continue your mental health journey</p>
+                {% endif %}
+
+                <!-- Animated line container -->
+                <div class="animated-line-container">
+                    {% if request.GET.action == "register" %}
+                    <div class="animated-line" id="registrationLine" style="width: 50%; left: 0%;"></div>
+                    {% else %}
+                    <div class="animated-line" id="loginLine" style="width: 100%; left: 0%;"></div>
+                    {% endif %}
+                </div>
+            </div>
+
+            {% if request.GET.action == "register" %}
+            <!-- Horizontal Registration Options -->
+            <div class="registration-container">
+                <div class="registration-option active" onclick="switchTab('user')">
+                    <div class="option-icon"><i class="fa-solid fa-user"></i></div>
+                    <h3 class="option-title">User Registration</h3>
+                    <p class="option-description">Join as a user to access mental health resources, connect with
+                        professionals, and track your wellness journey.</p>
+                </div>
+
+                <div class="registration-option" onclick="switchTab('counselor')">
+                    <div class="option-icon"><i class="fa-solid fa-user-doctor"></i></div>
+                    <h3 class="option-title">Counselor Registration</h3>
+                    <p class="option-description">Apply as a mental health professional to offer support, guidance, and
+                        counseling services to our community.</p>
+                </div>
+            </div>
+
+            <!-- User Registration Form -->
+            <div id="user-tab" class="tab-content active">
+                <form method="POST" id="userRegisterForm" action="{% url 'register_user' %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="user_type" value="user">
+
+                    <div class="input-group">
+                        <label class="input-label">Full Name</label>
+                        <input type="text" name="full_name" class="form-input" placeholder="Enter your full name"
+                            required>
+                        <div class="error-message">Please enter your full name</div>
+                    </div>
+
+                    <div class="input-group">
+                        <label class="input-label">Email Address</label>
+                        <input type="email" name="email" class="form-input" placeholder="Enter your email" required>
+                        <div class="error-message">Please enter a valid email address</div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="input-group">
+                            <label class="input-label">Password</label>
+                            <input type="password" name="password1" class="form-input" placeholder="Create password"
+                                required>
+                            <button type="button" class="password-toggle" onclick="togglePassword(this)">Show</button>
+                            <div class="error-message">Password must be at least 8 characters</div>
+                        </div>
+                        <div class="input-group">
+                            <label class="input-label">Confirm Password</label>
+                            <input type="password" name="password2" class="form-input" placeholder="Confirm password"
+                                required>
+                            <button type="button" class="password-toggle" onclick="togglePassword(this)">Show</button>
+                            <div class="error-message">Passwords do not match</div>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="input-group">
+                            <label class="input-label">Age</label>
+                            <input type="number" name="age" class="form-input" placeholder="Enter your age" min="13"
+                                max="120" required>
+                            <div class="error-message">Please enter a valid age (13-120)</div>
+                        </div>
+                        <div class="input-group">
+                            <label class="input-label">Gender</label>
+                            <div class="gender-toggle" onclick="toggleGenderOptions()">
+                                <span id="gender-text">Select your gender</span>
+                                <span id="gender-icon">▼</span>
+                            </div>
+                            <div class="gender-options" id="genderOptions">
+                                <div class="gender-option" onclick="selectGender('male')">
+                                    <span>Male</span>
+                                </div>
+                                <div class="gender-option" onclick="selectGender('female')">
+                                    <span>Female</span>
+                                </div>
+                                <div class="gender-option" onclick="selectGender('prefer_not_to_say')">
+                                    <span>Prefer Not To Say</span>
+                                </div>
+                            </div>
+                            <input type="hidden" name="gender" id="gender-input" required>
+                            <div class="error-message" id="gender-error">Please select your gender</div>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="input-group">
+                            <label class="input-label">Emergency Contact Name</label>
+                            <input type="text" name="emergency_contact_name" class="form-input"
+                                placeholder="Full name of emergency contact" required>
+                            <div class="error-message">Please enter emergency contact name</div>
+                        </div>
+                        <div class="input-group">
+                            <label class="input-label">Emergency Contact Phone</label>
+                            <input type="tel" name="emergency_contact_phone" class="form-input"
+                                placeholder="Phone number of emergency contact" required>
+                            <div class="error-message">Please enter a valid phone number</div>
+                        </div>
+                    </div>
+
+                    <div class="input-group relationship-select">
+                        <label class="input-label">Relationship to Emergency Contact</label>
+                        <div class="relationship-toggle" onclick="toggleRelationshipOptions()">
+                            <span id="relationship-text">Select relationship</span>
+                            <span id="relationship-icon">▼</span>
+                        </div>
+                        <div class="relationship-options" id="relationshipOptions">
+                            <div class="relationship-option" onclick="selectRelationship('parent')">
+                                <span>Parent</span>
+                            </div>
+                            <div class="relationship-option" onclick="selectRelationship('sibling')">
+                                <span>Sibling</span>
+                            </div>
+                            <div class="relationship-option" onclick="selectRelationship('partner')">
+                                <span>Partner</span>
+                            </div>
+                            <div class="relationship-option" onclick="selectRelationship('friend')">
+                                <span>Friend</span>
+                            </div>
+                            <div class="relationship-option" onclick="selectRelationship('relative')">
+                                <span>Relative</span>
+                            </div>
+                        </div>
+                        <input type="hidden" name="emergency_contact_relationship" id="relationship-input" required>
+                        <div class="error-message" id="relationship-error">Please select your relationship</div>
+                    </div>
+
+                    <div class="checkbox-group">
+                        <label class="custom-checkbox">
+                            <input type="checkbox" name="privacy_policy" required>
+                            <span class="checkbox-mark"></span>
+                        </label>
+                        <label class="checkbox-label">
+                            I accept the <a href="{% url 'privacy_policy' %}" target="_blank">Privacy Policy</a> and <a href="{% url 'terms_of_service' %}"
+                                target="_blank">Terms of Service</a>
+                        </label>
+                    </div>
+
+                    <button type="submit" class="submit-btn" id="userSubmitBtn">
+                        Create User Account
+                    </button>
+                </form>
+            </div>
+
+            <!-- Counselor Registration Form -->
+            <div id="counselor-tab" class="tab-content">
+                <form method="POST" id="counselorRegisterForm" action="{% url 'register_counselor' %}"
+                    enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <input type="hidden" name="user_type" value="counselor">
+
+                    <div class="form-row">
+                        <div class="input-group">
+                            <label class="input-label">First Name</label>
+                            <input type="text" name="first_name" class="form-input" placeholder="First name" required>
+                            <div class="error-message">Please enter your first name</div>
+                        </div>
+                        <div class="input-group">
+                            <label class="input-label">Last Name</label>
+                            <input type="text" name="last_name" class="form-input" placeholder="Last name" required>
+                            <div class="error-message">Please enter your last name</div>
+                        </div>
+                    </div>
+
+                    <div class="input-group">
+                        <label class="input-label">Professional Email</label>
+                        <input type="email" name="email" class="form-input" placeholder="professional@institution.com"
+                            required>
+                        <div class="error-message">Please enter a valid email address</div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="input-group">
+                            <label class="input-label">Password</label>
+                            <input type="password" name="password1" class="form-input" placeholder="Create password"
+                                required>
+                            <button type="button" class="password-toggle" onclick="togglePassword(this)">Show</button>
+                            <div class="error-message">Password must be at least 8 characters</div>
+                        </div>
+                        <div class="input-group">
+                            <label class="input-label">Confirm Password</label>
+                            <input type="password" name="password2" class="form-input" placeholder="Confirm password"
+                                required>
+                            <button type="button" class="password-toggle" onclick="togglePassword(this)">Show</button>
+                            <div class="error-message">Passwords do not match</div>
+                        </div>
+                    </div>
+
+                    <div class="input-group">
+                        <label class="input-label">Institution Name</label>
+                        <input type="text" name="institution_name" class="form-input"
+                            placeholder="e.g., University Medical Center" required>
+                    </div>
+
+                    <div class="input-group">
+                        <label class="input-label">Institution Email</label>
+                        <input type="email" name="institution_email" class="form-input"
+                            placeholder="contact@institution.com" required>
+                        <div class="error-message">Please enter your institution email</div>
+                    </div>
+
+                    <div class="input-group">
+                        <label class="input-label">License Number</label>
+                        <input type="text" name="license_number" class="form-input"
+                            placeholder="Professional license number" required>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="input-group">
+                            <label class="input-label">Years of Experience</label>
+                            <input type="number" name="years_experience" class="form-input" placeholder="Years" min="0"
+                                max="50" required>
+                        </div>
+                        <div class="input-group">
+                            <label class="input-label">Specialization</label>
+                            <div class="specialization-toggle" onclick="toggleSpecializationOptions()">
+                                <span id="specialization-text">Select Specialization</span>
+                                <span id="specialization-icon">▼</span>
+                            </div>
+                            <div class="specialization-options" id="specializationOptions">
+                                <div class="specialization-option">
+                                    <input type="checkbox" id="spec_anxiety" name="specializations"
+                                        value="Anxiety & Stress">
+                                    <label for="spec_anxiety">Anxiety & Stress</label>
+                                </div>
+                                <div class="specialization-option">
+                                    <input type="checkbox" id="spec_depression" name="specializations"
+                                        value="Depression & Mood">
+                                    <label for="spec_depression">Depression & Mood</label>
+                                </div>
+                                <div class="specialization-option">
+                                    <input type="checkbox" id="spec_relationships" name="specializations"
+                                        value="Relationship Issues">
+                                    <label for="spec_relationships">Relationship Issues</label>
+                                </div>
+                                <div class="specialization-option">
+                                    <input type="checkbox" id="spec_trauma" name="specializations"
+                                        value="Trauma & PTSD">
+                                    <label for="spec_trauma">Trauma & PTSD</label>
+                                </div>
+                                <div class="specialization-option">
+                                    <input type="checkbox" id="spec_grief" name="specializations" value="Grief & Loss">
+                                    <label for="spec_grief">Grief & Loss</label>
+                                </div>
+                                <div class="specialization-option">
+                                    <input type="checkbox" id="spec_self_esteem" name="specializations"
+                                        value="Self-Esteem">
+                                    <label for="spec_self_esteem">Self-Esteem</label>
+                                </div>
+                                <div class="specialization-option">
+                                    <input type="checkbox" id="spec_life_transitions" name="specializations"
+                                        value="Life Transitions">
+                                    <label for="spec_life_transitions">Life Transitions</label>
+                                </div>
+                                <div class="specialization-option">
+                                    <input type="checkbox" id="spec_work_stress" name="specializations"
+                                        value="Work Stress">
+                                    <label for="spec_work_stress">Work Stress</label>
+                                </div>
+                                <div class="specialization-option">
+                                    <input type="checkbox" id="spec_financial" name="specializations"
+                                        value="Financial Stress">
+                                    <label for="spec_financial">Financial Stress</label>
+                                </div>
+                                <div class="specialization-option">
+                                    <input type="checkbox" id="spec_academic" name="specializations"
+                                        value="Academic Pressure">
+                                    <label for="spec_academic">Academic Pressure</label>
+                                </div>
+                                <div class="specialization-option">
+                                    <input type="checkbox" id="spec_parenting" name="specializations" value="Parenting">
+                                    <label for="spec_parenting">Parenting</label>
+                                </div>
+                                <div class="specialization-option">
+                                    <input type="checkbox" id="spec_anger" name="specializations"
+                                        value="Anger Management">
+                                    <label for="spec_anger">Anger Management</label>
+                                </div>
+                                <div class="specialization-option">
+                                    <input type="checkbox" id="spec_mindfulness" name="specializations"
+                                        value="Mindfulness">
+                                    <label for="spec_mindfulness">Mindfulness</label>
+                                </div>
+                                <div class="specialization-option">
+                                    <input type="checkbox" id="spec_other" name="specializations"
+                                        value="Other Mild Concerns" onchange="toggleOtherConcernsInput(this)">
+                                    <label for="spec_other">Other Mild Concerns</label>
+                                </div>
+                                <!-- Add this input field inside the dropdown, right after the Other option -->
+                                <div id="other-concerns-input-container"
+                                    style="display: none; grid-column: 1 / -1; margin-top: 10px; padding: 12px 16px; background: rgba(160, 193, 216, 0.1); border-radius: 10px;">
+                                    <label
+                                        style="display: block; margin-bottom: 8px; font-weight: 500; color: var(--text-primary);">Please
+                                        specify other mild concerns</label>
+                                    <input type="text" name="other_concerns" class="form-input"
+                                        placeholder="Describe the other concerns you specialize in"
+                                        style="margin-bottom: 0;">
+                                    <div class="error-message">Please specify other concerns</div>
+                                </div>
+                            </div>
+                            <div class="error-message" id="specialization-error">Please select at least one
+                                specialization</div>
+                        </div>
+                    </div>
+
+                    <!-- Professional ID Upload Section -->
+                    <div class="input-group">
+                        <label class="input-label">Professional ID/License (PDF, JPG, PNG)</label>
+                        <div class="file-upload-container">
+                            <div class="file-upload">
+                                <input type="file" name="professional_id" id="professional_id"
+                                    accept=".pdf,.jpg,.jpeg,.png" required onchange="updateFileLabel(this, 'id-label')">
+                                <label class="file-upload-label" id="id-label">
+                                    <i class="fa-solid fa-file-invoice"></i> Upload Professional ID or License
+                                </label>
+                            </div>
+                            <div class="file-actions" id="id-actions" style="display: none;">
+                                <button type="button" class="file-action-btn preview-btn"
+                                    onclick="previewFile('professional_id')"><i class="fa-solid fa-eye"></i></button>
+                                <button type="button" class="file-action-btn delete-btn"
+                                    onclick="clearFile('professional_id', 'id-label', 'id-actions')"><i
+                                        class="fa-solid fa-xmark"></i></button>
+                            </div>
+                        </div>
+                        <div class="file-name" id="professional_id-file-name"></div>
+                    </div>
+
+                    <!-- Degree Certificate Upload Section -->
+                    <div class="input-group">
+                        <label class="input-label">Degree Certificate (PDF, JPG, PNG)</label>
+                        <div class="file-upload-container">
+                            <div class="file-upload">
+                                <input type="file" name="degree_certificate" id="degree_certificate"
+                                    accept=".pdf,.jpg,.jpeg,.png" required
+                                    onchange="updateFileLabel(this, 'degree-label')">
+                                <label class="file-upload-label" id="degree-label">
+                                    <i class="fa-solid fa-graduation-cap"></i> Upload Degree Certificate
+                                </label>
+                            </div>
+                            <div class="file-actions" id="degree-actions" style="display: none;">
+                                <button type="button" class="file-action-btn preview-btn"
+                                    onclick="previewFile('degree_certificate')"><i class="fa-solid fa-eye"></i></button>
+                                <button type="button" class="file-action-btn delete-btn"
+                                    onclick="clearFile('degree_certificate', 'degree-label', 'degree-actions')"><i
+                                        class="fa-solid fa-xmark"></i></button>
+                            </div>
+                        </div>
+                        <div class="file-name" id="degree_certificate-file-name"></div>
+                    </div>
+
+                    <div class="input-group">
+                        <label class="input-label">Professional Bio</label>
+                        <textarea name="bio" class="form-input"
+                            placeholder="Brief description of your background and approach..." rows="4"
+                            style="resize: vertical; height: auto;" required></textarea>
+                        <div class="error-message">Please enter your professional bio</div>
+                    </div>
+
+                    <div class="checkbox-group">
+                        <label class="custom-checkbox">
+                            <input type="checkbox" name="privacy_policy" required>
+                            <span class="checkbox-mark"></span>
+                        </label>
+                        <label class="checkbox-label">
+                            I accept the <a href="{% url 'privacy_policy' %}" target="_blank">Privacy Policy</a> and <a href="{% url 'terms_of_service' %}"
+                                target="_blank">Terms of Service</a>
+                        </label>
+                    </div>
+
+                    <div class="checkbox-group">
+                        <label class="custom-checkbox">
+                            <input type="checkbox" name="professional_agreement" required>
+                            <span class="checkbox-mark"></span>
+                        </label>
+                        <label class="checkbox-label">
+                            I certify that all provided information is accurate and agree to the <a href="{% url 'code_of_ethics' %}"
+                                target="_blank">Professional Code of Ethics</a>
+                        </label>
+                    </div>
+
+                    <button type="submit" class="submit-btn">
+                        Submit Application for Review
+                    </button>
+                </form>
+            </div>
+            <div class="toggle-link">
+                Already have an account? <a href="{% url 'form' %}?action=login">Sign in here</a>
+            </div>
+
+            {% else %}
+            <!-- Login Form -->
+            <form method="POST" id="loginForm" action="{% url 'login' %}">
+                {% csrf_token %}
+
+                <div class="input-group">
+                    <label class="input-label">Email Address</label>
+                    <input type="email" name="email" id="loginEmail" class="form-input" placeholder="Enter your email" required>
+                    <div class="error-message">Please enter a valid email address</div>
+                </div>
+
+                <div class="input-group">
+                    <label class="input-label">Password</label>
+                    <input type="password" name="password" class="form-input" placeholder="Enter your password"
+                        required>
+                    <button type="button" class="password-toggle" onclick="togglePassword(this)">Show</button>
+                    <div class="error-message">Please enter your password</div>
+                </div>
+
+                <div class="checkbox-group">
+                    <label class="custom-checkbox">
+                        <input type="checkbox" name="remember_me" id="rememberMeCheckbox">
+                        <span class="checkbox-mark"></span>
+                    </label>
+                    <label class="checkbox-label">Remember me</label>
+                </div>
+
+                <button type="submit" class="submit-btn">
+                    Sign In
+                </button>
+            </form>
+
+            <div class="toggle-link">
+                Don't have an account? <a href="{% url 'form' %}?action=register">Create one here</a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    <script src="{% static 'accounts/js/form.js' %}?v=2.2"></script>
+
+</body>
+
+</html>

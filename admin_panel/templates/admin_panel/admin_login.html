@@ -1,0 +1,243 @@
+{% extends "admin/base.html" %}
+{% load static %}
+
+{% comment %}
+📌 NOTES FOR TEAM — PLEASE READ
+
+This file (admin_panel/templates/admin_panel/admin_login.html) is the login interface for the MindEase admin panel.  
+Think of it as the main gate where admins, counselors, or staff enter the platform.
+
+🔹 What this file does:
+- Renders the login form for the admin panel.
+- Shows error messages for invalid login attempts.
+- Provides UI/UX enhancements like:
+    → Animated welcome text
+    → Password toggle visibility
+    → Login button loading effect
+    → Client-side form validation
+
+🔹 What you should NOT do:
+- Don’t rename "admin_panel" back to "accounts" → it will break imports.
+- Don’t remove or drastically modify the JS — it controls animations and validation.
+- Don’t delete Django blocks like {{ block.super }} — they’re necessary for proper rendering.
+
+🔹 How you should FEEL about this file:
+This is the entry point for all admin users.  
+Handle it carefully: broken login UI or JS can confuse users or block access. ❤️
+{% endcomment %}
+
+{% block extrastyle %}
+    {{ block.super }}
+    <link rel="stylesheet" href="{% static 'admin_panel/css/admin_login.css' %}?v={{ timestamp|default:'1.0' }}">
+{% endblock %}
+
+{% block title %}MindEase Admin Login{% endblock %}
+{% block breadcrumbs %}{% endblock %}
+{% block nav-sidebar %}{% endblock %}
+{% block header %}{% endblock %}
+{% block footer %}{% endblock %}
+
+{# ✅ Override Django's default messages block so frontend messages won't leak here #}
+{% block messages %}{% endblock %}
+
+{% block content %}
+<!-- All your HTML and JS content stays the same -->
+<div class="bg-animation">
+    <div class="floating-shape shape-1"></div>
+    <div class="floating-shape shape-2"></div>
+    <div class="floating-shape shape-3"></div>
+    <div class="floating-shape shape-4"></div>
+    <div class="floating-shape shape-5"></div>
+    <div class="floating-shape shape-6"></div>
+</div>
+
+<div class="main-container">
+    <div class="left-section">
+        <div class="brain-container">
+            <img src="{% static 'accounts/images/logo.png' %}" alt="Logo" class="logo-image" style="width: 250px; height: 250px;">
+            <!--div class="brain-emoji">🧠</div-->
+        </div>
+        <div class="welcome-text" id="welcomeText">
+            <span id="typedText"></span>
+            <span class="cursor" id="cursor">|</span>
+        </div>
+    </div>
+    
+    <div class="right-section">
+        <div class="login-container">
+            <h1 class="login-title">Login</h1>
+            {% if form.non_field_errors %}
+                <div class="error-message non-field-error">
+                    {{ form.non_field_errors.0 }}
+                </div>
+            {% endif %}
+            <form method="post" class="login-form" id="loginForm">
+                {% csrf_token %}
+                <!-- Form fields remain unchanged -->
+                <div class="form-group">
+                    <label for="{{ form.username.id_for_label }}">{{ form.username.label }}</label>
+                    <div class="input-container">
+                        {{ form.username }}
+                    </div>
+                    {% if form.username.errors %}
+                        <div class="error-message">{{ form.username.errors.0 }}</div>
+                    {% else %}
+                        <div class="error-message" id="usernameError"></div>
+                    {% endif %}
+                </div>
+
+                <div class="form-group">
+                    <label for="{{ form.password.id_for_label }}">{{ form.password.label }}</label>
+                    <div class="input-container password-container">
+                        {{ form.password }}
+                        <button type="button" class="password-toggle" id="passwordToggle">
+                            <span class="toggle-text">Show</span>
+                        </button>
+                    </div>
+                    <div class="error-message" id="passwordError"></div>
+                </div>
+
+                <input type="hidden" name="next" value="{{ next }}">
+                
+                <button type="submit" class="login-btn" id="loginBtn">
+                    <span class="btn-text">Log In</span>
+                    <div class="spinner" style="display: none;">
+                        <div class="spinner-ring"></div>
+                    </div>
+                </button>
+            </form>
+            
+            <div class="forgot-password">
+                <a href="#" class="forgot-link">Forgot Password?</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const welcomeText = document.getElementById('welcomeText');
+    const text = 'Welcome to MindEase Admin Site';
+
+    function typeWriter() {
+    let i = 0;
+    welcomeText.innerHTML = '<span id="typedText"></span><span class="cursor" id="cursor">|</span>';
+    const typedText = document.getElementById('typedText');
+    const cursor = document.getElementById('cursor');
+
+    function type() {
+        if (i < text.length) {
+            typedText.innerHTML = text.substring(0, i + 1);
+            i++;
+            setTimeout(type, 100);
+            
+            // Move cursor to the end of the text
+            cursor.style.position = 'relative';
+            cursor.style.left = '0';
+        } else {
+            // Blink 5 times at the end
+            let blinkCount = 0;
+            function blink() {
+                cursor.style.opacity = cursor.style.opacity === '0' ? '1' : '0';
+                blinkCount++;
+                if (blinkCount < 10) {
+                    setTimeout(blink, 300);
+                } else {
+                    cursor.style.opacity = '1';
+                    setTimeout(() => {
+                        welcomeText.innerHTML = '<span id="typedText"></span><span class="cursor" id="cursor">|</span>';
+                        typeWriter();
+                    }, 500);
+                }
+            }
+            blink();
+        }
+    }
+    type();
+}
+
+    typeWriter();
+    
+    // Password toggle
+    const passwordToggle = document.getElementById('passwordToggle');
+    const passwordField = document.querySelector('input[type="password"], input[name="password"]');
+    
+    if (passwordToggle && passwordField) {
+        passwordToggle.addEventListener('click', function() {
+            const type = passwordField.getAttribute('type') === 'password' ? 'text' : 'password';
+            passwordField.setAttribute('type', type);
+            this.querySelector('.toggle-text').textContent = type === 'password' ? 'Show' : 'Hide';
+        });
+    }
+    
+    // Login button loading effect
+    const loginForm = document.getElementById('loginForm');
+    const loginBtn = document.getElementById('loginBtn');
+    
+    if (loginForm && loginBtn) {
+        loginForm.addEventListener('submit', function(e) {
+            const btnText = loginBtn.querySelector('.btn-text');
+            const spinner = loginBtn.querySelector('.spinner');
+            
+            loginBtn.disabled = true;
+            btnText.style.display = 'none';
+            spinner.style.display = 'block';
+            
+            // Simulate loading delay
+            setTimeout(() => {
+                // Form will submit normally after delay
+            }, 1000);
+        });
+    }
+});
+// Form validation
+const usernameField = document.querySelector('input[name="username"]');
+const passwordField = document.querySelector('input[name="password"]');
+const usernameError = document.getElementById('usernameError');
+const passwordError = document.getElementById('passwordError');
+
+// Clear errors on input
+usernameField.addEventListener('input', function() {
+    usernameError.textContent = '';
+});
+
+passwordField.addEventListener('input', function() {
+    passwordError.textContent = '';
+});
+
+// Form validation before submission
+loginForm.addEventListener('submit', function(e) {
+    let isValid = true;
+    
+    // Clear previous errors
+    usernameError.textContent = '';
+    passwordError.textContent = '';
+    
+    // Validate username
+    if (!usernameField.value.trim()) {
+        usernameError.textContent = 'Please enter your email first';
+        isValid = false;
+    }
+    
+    // Validate password
+    if (!passwordField.value.trim()) {
+        passwordError.textContent = 'Please enter your password first';
+        isValid = false;
+    }
+    
+    // If validation fails, prevent form submission
+    if (!isValid) {
+        e.preventDefault();
+        return;
+    }
+    
+    // If validation passes, show loading state
+    const btnText = loginBtn.querySelector('.btn-text');
+    const spinner = loginBtn.querySelector('.spinner');
+    
+    loginBtn.disabled = true;
+    btnText.style.display = 'none';
+    spinner.style.display = 'block';
+});
+</script>
+{% endblock %}

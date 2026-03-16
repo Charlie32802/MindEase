@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+  <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Application Submitted - MindEase</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'accounts/css/registration_pending.css' %}">
+</head>
+<body>
+    <div class="container">
+        <h1>Application Submitted</h1>
+        <p>Your counselor application has been submitted and is pending review. Our team will review your credentials and you will receive an email notification once your account is approved. This process typically takes 1-2 business days.</p>
+        <a href="{% url 'home' %}" class="btn">Return to Home</a>
+    </div>
+</body>
+</html>

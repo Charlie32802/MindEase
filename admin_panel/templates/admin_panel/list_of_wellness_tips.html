@@ -1,0 +1,81 @@
+{% extends "admin_panel/base.html" %}
+{% load static %}
+
+{% block title %}Wellness Tips | MindEase Administration{% endblock %}
+
+{% block extrastyle %}
+{{ block.super }}
+<link rel="stylesheet" href="{% static 'admin_panel/css/list_of_users.css' %}">
+<link rel="stylesheet" href="{% static 'admin_panel/css/custom_search.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="admin-dashboard-wrapper {% if sidebar_collapsed %}sidebar-collapsed{% endif %}">
+    {% include "admin_panel/success_message.html" %}
+
+    <div class="page-header">
+        <h1 class="page-title">Wellness Tips</h1>
+
+    </div>
+
+    <div class="custom-user-list-container">
+        <a href="{% url 'custom_admin:add_wellness_tip' %}" class="add-btn"> <i class="fas fa-plus"></i> Add Tip</a>
+        <br><br>
+        <table class="custom-user-table" aria-label="Wellness Tips List">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Title</th>
+                    <th>Description</th>
+                    <th>Created At</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for tip in tips %}
+                <tr>
+                    <td>{{ tip.id }}</td>
+                    <td>{{ tip.title }}</td>
+                    <td>{{ tip.description|truncatechars:80 }}</td>
+                    <td>{{ tip.created_at|date:"F j, Y, g:i A" }}</td>
+                    <td>
+                        <a href="{% url 'custom_admin:edit_wellness_tip' tip.id %}" class="edit-btn">Edit | </a>
+                        <a href="{% url 'custom_admin:delete_wellness_tip' tip.id %}" class="delete-btn">Delete</a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5">No wellness tips available.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
+
+{% block footer %}
+{{ block.super }}
+<script>
+    // Sync the wrapper with sidebar collapse state
+    document.addEventListener('DOMContentLoaded', () => {
+        const wrapper = document.querySelector('.admin-dashboard-wrapper');
+        const sidebar = document.querySelector('.admin-custom-sidebar');
+
+        if (!wrapper || !sidebar) return;
+
+        // Initial state logic is handled by admin_site_pagination.js or similar, 
+        // but we patch toggleSidebar here as a fallback for the list view
+        const origToggle = window.toggleSidebar;
+        window.toggleSidebar = function () {
+            if (origToggle) origToggle();
+
+            if (sidebar.classList.contains('collapsed')) {
+                wrapper.classList.add('sidebar-collapsed');
+            } else {
+                wrapper.classList.remove('sidebar-collapsed');
+            }
+        };
+    });
+</script>
+{% endblock %}

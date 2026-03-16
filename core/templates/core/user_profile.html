@@ -1,0 +1,128 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>User Profile — MindEase</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="{% static 'core/css/user_profile.css' %}">
+</head>
+
+<body>
+  <!-- Header -->
+  <header class="header">
+    <a href="{% url 'user_dashboard' %}" class="logo-link" style="text-decoration: none;">
+      <div class="logo" style="display:flex; align-items:center; gap:8px;">
+        <img src="{% static 'accounts/images/logo.png' %}" alt="Logo"
+          style="width: 28px; height: 28px; object-fit: contain;">
+        <span>MindEase</span>
+      </div>
+    </a>
+  </header>
+
+  <main class="container">
+    <div class="back-row">
+      <a href="{% url 'user_dashboard' %}" class="back-link"><i class="fa-solid fa-arrow-left"></i> Back to
+        Dashboard</a>
+    </div>
+
+    <section class="page-header">
+      <h1 class="page-title">Update Profile</h1>
+      <p class="page-subtitle">Manage your personal information</p>
+    </section>
+
+    <div class="profile-grid">
+      <!-- LEFT: User Profile Form -->
+      <form method="POST" enctype="multipart/form-data" class="profile-form">
+        {% csrf_token %}
+        <div class="profile-top">
+          <div class="avatar">
+            <div class="avatar-circle">U</div>
+            <label class="upload-btn">
+              <input type="file" id="photoInput" hidden accept="image/*">
+              Change Photo
+            </label>
+            <small class="hint">JPG, GIF or PNG. Max size 2MB</small>
+          </div>
+        </div>
+
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="fullname">Full Name</label>
+            <input id="fullname" name="fullname" value="{{ user.full_name|default:'John Doe' }}">
+          </div>
+
+          <div class="form-group">
+            <label for="email">Email</label>
+            <input id="email" name="email" value="{{ user.email|default:'john.doe@example.com' }}">
+          </div>
+
+          <div class="form-group">
+            <label for="phone">Phone</label>
+            <input id="phone" name="phone" value="+1 (555) 987-6543">
+          </div>
+
+          <div class="form-group">
+            <label for="age">Age</label>
+            <input id="age" name="age" value="25">
+          </div>
+
+          <div class="form-group">
+            <label for="focus">Health Focus</label>
+            <input id="focus" name="focus" value="Stress Management, Anxiety Support">
+          </div>
+
+          <div class="form-group">
+            <label for="location">Location</label>
+            <input id="location" name="location" value="San Francisco, CA">
+          </div>
+        </div>
+
+        <div class="form-group full">
+          <label for="bio">About Me</label>
+          <textarea id="bio"
+            name="bio">I’m passionate about mental wellness and self-growth. MindEase has helped me track my wellbeing and connect with supportive counselors.</textarea>
+        </div>
+
+        <button type="submit" class="save-btn"><i class="fa-solid fa-floppy-disk"></i> Save Changes</button>
+      </form>
+
+      <!-- RIGHT: Wellbeing Stats -->
+      <div class="profile-side">
+        <div class="card profile-status">
+          <h3 class="card-title"><i class="fa-solid fa-leaf"></i> Wellbeing Overview</h3>
+          <div class="stats">
+            <p>Sessions Completed <span>12</span></p>
+            <p>Active Streak <span>7 days</span></p>
+            <p>Achievements <span>5 badges</span></p>
+          </div>
+        </div>
+
+        <div class="card preferences">
+          <h3 class="card-title"><i class="fa-solid fa-gear"></i> Preferences</h3>
+          <button type="button" class="pref-btn">Notification Settings</button>
+          <button type="button" class="pref-btn">Privacy Options</button>
+          <button type="button" class="pref-btn">Linked Accounts</button>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script src="{% static 'core/js/user_profile.js' %}"></script>
+  <script>
+    window.AI_USER_NAME = "{{ user.full_name|default:user.get_username|escapejs }}";
+  </script>
+
+  {% if user.is_authenticated %}
+  {% include 'ai_companion/widget.html' %}
+  {% endif %}
+</body>
+
+</html>

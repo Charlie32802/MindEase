@@ -1,0 +1,84 @@
+{% load static %}
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link rel="stylesheet" href="{% static 'ai_companion/css/widget.css' %}?v={% now 'YmdH' %}">
+
+<style>
+    /* Force SweetAlert2 modal to always be on top of the fullscreen AI widget */
+    body.swal2-shown .swal2-container {
+        z-index: 9999999 !important;
+    }
+</style>
+
+<div id="aiWidgetContainer"
+    style="all: initial; position: fixed; bottom: 20px; right: 20px; z-index: 999998; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
+
+    <div class="ai-companion-widget">
+        <button class="ai-companion-button" onclick="toggleAIChat()">
+            <span class="icon"><i class="fa-solid fa-robot"></i></span>
+            <span class="notification-dot" style="display: none;"></span>
+        </button>
+
+        <div class="ai-chat-container" id="aiChatContainer">
+            <div class="ai-chat-header">
+                <div class="header-content">
+                    <div class="ai-avatar"><i class="fa-solid fa-robot" style="font-size:24px; color:white;"></i></div>
+                    <div class="ai-info">
+                        <div class="ai-name">MindEase AI</div>
+                        <div class="ai-status">
+                            <span class="status-dot"></span>
+                            <span>Always here for you</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="header-actions">
+                    <button class="header-action-btn fullscreen-btn" onclick="toggleFullscreen()"><i
+                            class="fa-solid fa-expand"></i></button>
+                    <button class="header-action-btn" onclick="openClearChatModal()" title="Clear conversation"><i
+                            class="fa-solid fa-trash"></i></button>
+                    <button class="close-btn" onclick="toggleAIChat()"><i class="fa-solid fa-xmark"></i></button>
+                </div>
+            </div>
+
+            <div class="ai-chat-messages" id="chatMessages"></div>
+
+            <div class="quick-actions">
+                <button class="quick-action-btn" onclick="sendQuickMessage('How do I join a session?')">
+                    <span><i class="fa-solid fa-video"></i></span> Join Session
+                </button>
+                <button class="quick-action-btn" onclick="sendQuickMessage('How do I book an appointment?')">
+                    <span><i class="fa-solid fa-calendar-check"></i></span> Book Appointment
+                </button>
+                <button class="quick-action-btn" onclick="sendQuickMessage('How do I cancel my booking?')">
+                    <span><i class="fa-solid fa-ban"></i></span> Cancel Booking
+                </button>
+                <button class="quick-action-btn" onclick="sendQuickMessage('Where can I see my past sessions?')">
+                    <span><i class="fa-solid fa-clock-rotate-left"></i></span> Past Sessions
+                </button>
+                <button class="quick-action-btn" onclick="sendQuickMessage('How do I contact support?')">
+                    <span><i class="fa-solid fa-life-ring"></i></span> Get Support
+                </button>
+            </div>
+
+            <div class="ai-chat-input">
+                <input type="text" id="chatInput" placeholder="Type your message..." onkeypress="handleKeyPress(event)">
+                <button onclick="sendMessage()" id="sendButton">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="22" y1="2" x2="11" y2="13"></line>
+                        <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    window.AI_USER_NAME = "{{ full_name|default:user.full_name|default:'there'|escapejs }}";
+</script>
+
+<!-- Markdown parser for rich text bot responses -->
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+<script src="{% static 'ai_companion/js/widget.js' %}?v={% now 'YmdH' %}"></script>

@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+  <meta charset="UTF-8">
+    <title>Verify Your Email</title>
+</head>
+<body style="font-family: Arial, sans-serif; line-height: 1.6;">
+    <h2>Welcome to MindEase, {{ user.full_name }}!</h2>
+    <p>Thank you for signing up. Please click the link below to verify your email and activate your account:</p>
+    <p>
+        <a href="{{ activation_link }}" style="background-color: #4CAF50; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;">
+            Activate My Account
+        </a>
+    </p>
+    <p>If you didn’t sign up for MindEase, you can safely ignore this email.</p>
+    <p>— The MindEase Team</p>
+</body>
+</html>

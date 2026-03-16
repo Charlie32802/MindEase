@@ -1,0 +1,176 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Privacy Policy — MindEase</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{% static 'accounts/css/legal.css' %}">
+</head>
+<body>
+
+<header class="legal-header">
+    <a href="{% url 'home' %}" class="back-link"><i class="fa-solid fa-arrow-left"></i> Back to Home</a>
+    <h1>Privacy Policy</h1>
+    <p class="effective-date">Effective Date: March 2025</p>
+</header>
+
+<main class="legal-container">
+
+    <nav class="toc">
+        <h2>Table of Contents</h2>
+        <ol>
+            <li><a href="#information-we-collect">Information We Collect</a></li>
+            <li><a href="#how-we-use">How We Use Your Information</a></li>
+            <li><a href="#data-storage">Data Storage & Security</a></li>
+            <li><a href="#third-party">Third-Party Services</a></li>
+            <li><a href="#cookies">Cookies & Local Storage</a></li>
+            <li><a href="#your-rights">Your Rights</a></li>
+            <li><a href="#data-retention">Data Retention</a></li>
+            <li><a href="#children">Children's Privacy</a></li>
+            <li><a href="#changes">Changes to This Policy</a></li>
+            <li><a href="#contact">Contact Us</a></li>
+        </ol>
+    </nav>
+
+    <section class="legal-section" id="information-we-collect">
+        <h2>1. Information We Collect</h2>
+        <h3>Account Registration (Users)</h3>
+        <p>When you register as a user, we collect the following:</p>
+        <ul>
+            <li>Full name, email address, age, and gender</li>
+            <li>Emergency contact information (name, phone number, and relationship)</li>
+            <li>Password (stored as a securely hashed value — we never store your plain-text password)</li>
+        </ul>
+
+        <h3>Account Registration (Counselors)</h3>
+        <p>When you register as a counselor, we additionally collect:</p>
+        <ul>
+            <li>First name, last name, and professional email</li>
+            <li>Institution name and institution email</li>
+            <li>License number and years of experience</li>
+            <li>Specializations and professional bio</li>
+            <li>Uploaded documents: professional ID/license and degree certificate (PDF, JPG, or PNG)</li>
+        </ul>
+
+        <h3>AI Companion Interactions</h3>
+        <p>When you use the MindEase AI Companion, we store:</p>
+        <ul>
+            <li>Your messages and the AI's responses within a conversation session</li>
+            <li>Session identifiers used to maintain conversation continuity</li>
+            <li>Counselor suggestion data generated during conversations</li>
+        </ul>
+
+        <h3>Session & Appointment Data</h3>
+        <ul>
+            <li>Appointment dates, times, and status (pending, started, completed, cancelled)</li>
+            <li>Video session duration and counselor notes from completed sessions</li>
+            <li>Feedback ratings (1–5 stars) and text messages submitted after sessions</li>
+        </ul>
+
+        <h3>System Feedback</h3>
+        <p>If you submit feedback through the "Get Support" page, we collect your message. Providing your name is optional.</p>
+    </section>
+
+    <section class="legal-section" id="how-we-use">
+        <h2>2. How We Use Your Information</h2>
+        <p>We use the information collected to:</p>
+        <ul>
+            <li>Create and manage your account, including email verification</li>
+            <li>Provide AI-powered mental health support through the AI Companion</li>
+            <li>Match you with verified counselors based on your needs and their specializations</li>
+            <li>Facilitate appointment scheduling, video consultations, and in-session communication</li>
+            <li>Display counselor profiles, ratings, and anonymized reviews to users</li>
+            <li>Send transactional emails (account activation, counselor approval/rejection notifications)</li>
+            <li>Track platform activity for administrative oversight and system improvement</li>
+            <li>Generate aggregate, anonymized analytics for the admin dashboard</li>
+        </ul>
+    </section>
+
+    <section class="legal-section" id="data-storage">
+        <h2>3. Data Storage & Security</h2>
+        <p>Your data is stored in a MySQL database with UTF-8 encoding and strict transaction mode. We employ the following security measures:</p>
+        <ul>
+            <li>Passwords are hashed using Django's built-in PBKDF2 algorithm — never stored in plain text</li>
+            <li>CSRF protection is enabled on all form submissions</li>
+            <li>Video session tokens are generated server-side using HMAC-SHA256 with time-limited expiry (1 hour)</li>
+            <li>Real-time WebSocket connections are authenticated and scoped to individual users</li>
+            <li>Counselor profile views are tracked using SHA-256 hashed identifiers (not raw IP addresses)</li>
+            <li>Database operations for booking use atomic transactions with row-level locking to prevent data corruption</li>
+        </ul>
+    </section>
+
+    <section class="legal-section" id="third-party">
+        <h2>4. Third-Party Services</h2>
+        <p>MindEase integrates with the following third-party services:</p>
+        <ul>
+            <li><strong>Groq API (LLaMA 3.3 70B Versatile)</strong> — Powers the AI Companion. Your messages are sent to Groq's API for generating responses. Groq's privacy policy applies to data processed by their servers.</li>
+            <li><strong>Agora RTC</strong> — Provides real-time video and audio communication for counseling sessions. Agora processes audio/video streams during active sessions only.</li>
+            <li><strong>Gmail SMTP</strong> — Used to send transactional emails (account verification, counselor approval/rejection). Only the recipient's email address and message content are transmitted.</li>
+            <li><strong>NewsAPI, RSS2JSON, GNews</strong> — Used by the admin panel to aggregate Philippines news articles. No user data is shared with these services.</li>
+        </ul>
+    </section>
+
+    <section class="legal-section" id="cookies">
+        <h2>5. Cookies & Local Storage</h2>
+        <p>MindEase uses the following browser-based storage:</p>
+        <ul>
+            <li><strong>Session cookies</strong> — Django session cookies to maintain your authenticated login state</li>
+            <li><strong>CSRF cookie</strong> — A security token to protect against cross-site request forgery</li>
+            <li><strong>localStorage</strong> — Used to store your AI chat session identifier, notification state (unread badges), last recommended counselor data, and optionally your email address if you choose "Remember Me" on the login form</li>
+        </ul>
+        <p>We do not use tracking cookies, advertising cookies, or any third-party analytics cookies.</p>
+    </section>
+
+    <section class="legal-section" id="your-rights">
+        <h2>6. Your Rights</h2>
+        <p>You have the right to:</p>
+        <ul>
+            <li><strong>Access</strong> — Request a copy of the personal data we hold about you</li>
+            <li><strong>Correction</strong> — Request correction of inaccurate personal data</li>
+            <li><strong>Deletion</strong> — Request deletion of your account and associated data</li>
+            <li><strong>Clear AI History</strong> — Clear your AI Companion conversation history at any time using the built-in "Clear Chat" function</li>
+        </ul>
+        <p>To exercise these rights, please contact us through the "Get Support" page or send an email to the platform administrator.</p>
+    </section>
+
+    <section class="legal-section" id="data-retention">
+        <h2>7. Data Retention</h2>
+        <p>We retain your data for as long as your account is active. Specifically:</p>
+        <ul>
+            <li>Account data is retained until you request account deletion</li>
+            <li>AI conversation history can be cleared by you at any time and is tied to your session</li>
+            <li>Appointment records and counselor notes are retained for continuity-of-care purposes</li>
+            <li>Feedback and ratings are retained in anonymized form even after account deletion</li>
+            <li>Uploaded counselor credentials are retained only while the counselor account is active</li>
+        </ul>
+    </section>
+
+    <section class="legal-section" id="children">
+        <h2>8. Children's Privacy</h2>
+        <p>MindEase requires users to be at least 13 years of age to register. We do not knowingly collect personal information from children under 13. If we discover that a user under 13 has registered, we will promptly deactivate the account and delete the associated data.</p>
+    </section>
+
+    <section class="legal-section" id="changes">
+        <h2>9. Changes to This Policy</h2>
+        <p>We may update this Privacy Policy from time to time. Any changes will be reflected by updating the "Effective Date" at the top of this page. Continued use of MindEase after changes constitutes acceptance of the revised policy.</p>
+    </section>
+
+    <section class="legal-section" id="contact">
+        <h2>10. Contact Us</h2>
+        <p>If you have any questions or concerns about this Privacy Policy, please reach out through the "Get Support" page on your dashboard or contact the MindEase administration team directly.</p>
+    </section>
+
+</main>
+
+<footer class="legal-footer">
+    <p>&copy; 2024 MindEase — Integrated Mental Health Support Platform</p>
+</footer>
+
+<button class="back-to-top" title="Back to top"><i class="fa-solid fa-arrow-up"></i></button>
+
+<script src="{% static 'accounts/js/legal.js' %}"></script>
+</body>
+</html>

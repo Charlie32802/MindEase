@@ -1,0 +1,31 @@
+/* ── Feedback List Admin Styles ── */
+.rating-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 10px;
+    background: rgba(251, 191, 36, 0.15);
+    color: #fbbf24;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+}
+.rating-badge i { font-size: 10px; }
+
+.no-rating-badge {
+    display: inline-block;
+    padding: 3px 10px;
+    background: rgba(160, 174, 192, 0.15);
+    color: #a0aec0;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.feedback-msg {
+    display: block;
+    max-width: 280px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
