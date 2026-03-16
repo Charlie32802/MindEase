@@ -25,7 +25,7 @@ overflow-x: hidden;
 position: relative;
 }
 
-/* Animated background elements */
+/* Cinematic 3D Background elements */
 .bg-animation {
 position: absolute;
 top: 0;
@@ -34,25 +34,83 @@ width: 100%;
 height: 100%;
 overflow: hidden;
 z-index: 0;
+background: radial-gradient(circle at 50% 50%, #2b5876 0%, #1e3c50 100%);
 }
 
 .floating-shape {
 position: absolute;
 border-radius: 50%;
-background: rgba(255, 255, 255, 0.15); /* Slight opacity increase for reduced blur */
-animation: float 20s infinite ease-in-out;
-/* Removed backdrop-filter for better performance on low-end devices */
+/* Force hardware acceleration for smooth 60FPS */
+will-change: transform;
+/* Liquid/Glass 3D Orb Effect */
+background: radial-gradient(
+    circle at 30% 30%, 
+    rgba(255, 255, 255, 0.4) 0%, 
+    rgba(255, 255, 255, 0.1) 20%, 
+    rgba(255, 255, 255, 0.02) 60%, 
+    rgba(0, 0, 0, 0.1) 100%
+);
+box-shadow: 
+    inset 0 0 20px rgba(255, 255, 255, 0.2), /* Inner edge highlight */
+    inset 10px 0 40px rgba(255, 255, 255, 0.1), /* Side highlight */
+    inset -10px -10px 40px rgba(0, 0, 0, 0.1), /* Inner shadow */
+    0 20px 40px rgba(0, 0, 0, 0.2); /* Outer drop shadow */
+animation: cinematicFloat 40s infinite cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.shape-1 { width: 300px; height: 300px; top: 10%; left: -5%; animation-delay: 0s; }
-.shape-2 { width: 200px; height: 200px; top: 60%; right: -3%; animation-delay: -7s; }
-.shape-3 { width: 150px; height: 150px; top: 30%; left: 70%; animation-delay: -14s; }
-.shape-4 { width: 400px; height: 400px; bottom: -10%; left: 20%; animation-delay: -5s; }
+/* Variations in size, blur, and opacity for depth of field */
+.shape-1 { 
+    width: 450px; height: 450px; 
+    top: -5%; left: -10%; 
+    animation-duration: 45s;
+    animation-delay: 0s; 
+    filter: blur(4px);
+    opacity: 0.8;
+}
 
-@keyframes float {
-0%, 100% { transform: translateY(0px) rotate(0deg); }
-33% { transform: translateY(-30px) rotate(120deg); }
-66% { transform: translateY(20px) rotate(240deg); }
+.shape-2 { 
+    width: 300px; height: 300px; 
+    top: 50%; right: -5%; 
+    animation-duration: 35s;
+    animation-delay: -15s; 
+    filter: blur(2px);
+    background: radial-gradient(circle at 30% 30%, rgba(130, 230, 217, 0.3) 0%, rgba(255, 255, 255, 0.05) 50%, transparent 100%);
+}
+
+.shape-3 { 
+    width: 200px; height: 200px; 
+    top: 20%; left: 60%; 
+    animation-duration: 40s;
+    animation-delay: -25s; 
+    filter: blur(8px);
+    opacity: 0.5;
+}
+
+.shape-4 { 
+    width: 550px; height: 550px; 
+    bottom: -15%; left: 15%; 
+    animation-duration: 50s;
+    animation-delay: -5s; 
+    filter: blur(6px);
+    background: radial-gradient(circle at 30% 30%, rgba(102, 126, 234, 0.2) 0%, rgba(255, 255, 255, 0.05) 50%, transparent 100%);
+}
+
+@keyframes cinematicFloat {
+0% { 
+    transform: translate3d(0px, 0px, 0px) rotate(0deg) scale(1); 
+}
+25% { 
+    transform: translate3d(-30px, 40px, 50px) rotate(45deg) scale(1.05); 
+}
+50% { 
+    transform: translate3d(20px, -60px, 100px) rotate(90deg) scale(0.95); 
+}
+75% { 
+    transform: translate3d(50px, 20px, 50px) rotate(135deg) scale(1.02); 
+}
+100% { 
+    transform: translate3d(0px, 0px, 0px) rotate(180deg) scale(1); 
+}
 }
 
 /* Navigation */
