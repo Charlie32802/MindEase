@@ -423,7 +423,7 @@ class SystemFeedbackPagination {
             const iconBg = isCounselor ? 'rgba(96, 165, 250, 0.2)' : 'rgba(245, 158, 11, 0.2)';
             const iconColor = isCounselor ? '#60a5fa' : '#f59e0b';
             const icon = isCounselor ? 'fa-user-md' : 'fa-comment';
-            const extra = fb.extra ? ` <span style="color:rgba(210,225,255,0.5);font-size:12px;">${fb.extra}</span>` : '';
+            const extra = fb.extra ? ` <span style="color: #64748b; font-size: 13px; font-weight: 600; font-style: italic;">${fb.extra}</span>` : '';
             const stars = isCounselor && fb.rating ? ' ⭐'.repeat(fb.rating) : '';
 
             return `
